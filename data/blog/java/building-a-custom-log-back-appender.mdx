@@ -1,30 +1,144 @@
 ---
 title: Building a custom log-back appender for error reporting
 date: '2024-01-02'
-tags: ['Java']
+tags: ['Java', 'Spring Boot', 'Logback']
 draft: false
-summary: 'The blog template supports posts in nested sub-folders. This can be used to group posts of similar content e.g. a multi-part course. This post is itself an example of a nested route!'
+summary: "Enhance Your Spring Boot Application's Error Handling with a Custom Logback Appender! Learn how to create a specialized appender that sends email notifications for errors, complete with the last 20 log messages for context."
 ---
 
-# Nested Routes
+# Building a Custom Logback Appender for Enhanced Error Reporting in Spring Boot
 
-The blog template supports posts in nested sub-folders. This helps in organisation and can be used to group posts of similar content e.g. a multi-part series. This post is itself an example of a nested route! It's located in the `/data/blog/nested-route` folder.
+## Problem
 
-## How
+Our team faced a critical challenge in enhancing error notification mechanisms across our microservice architecture, which comprises over 34 services. The existing alert systems fell short of our expectations, plagued by significant delays or, at times, failing to dispatch error notifications entirely. Given our organization's secure email environment, leveraging standard emailing libraries for notifications wasn't an option. Instead, we relied on an internal email service accessible via API, which further complicated matters with its authentication requirements. This backdrop sets the stage for understanding the complexity of implementing a direct and efficient solution.
 
-Simplify create multiple folders inside the main `/data/blog` folder and add your `.md`/`.mdx` files to them. You can even create something like `/data/blog/nested-route/deeply-nested-route/my-post.md`
+The straightforward approach of integrating email notifications directly into each service's error handling logic was deemed impractical. Such an endeavor would necessitate extensive code refactoring and rigorous testing across all services—a resource-intensive process we could ill afford. Moreover, our exploration of third-party solutions ended in vain, either due to incompatibility with our organizational constraints or outright access restrictions.
 
-We use Next.js catch all routes to handle the routing and path creations.
+With these challenges in mind, let's explore an innovative solution that circumvents these hurdles, ensuring timely and reliable error alerting without the need for exhaustive manual intervention.
 
-## Use Cases
+## Solution
 
-Here are some reasons to use nested routes
+The solution was simple. Upon reviewing the codebase, a critical question emerged: "Could there be a method to integrate error handling directly within the existing logging framework, avoiding redundant code across multiple services?" This question paved the way for a paradigm shift in my approach to error notification.
 
-- More logical content organisation (blogs will still be displayed based on the created date)
-- Multi-part posts
-- Different sub-routes for each author
-- Internationalization (though it would be recommended to use [Next.js built-in i8n routing](https://nextjs.org/docs/advanced-features/i18n-routing))
+Fortunately, Java Spring Boot offers the capability to develop custom loggers, allowing for direct interaction with the service's logging mechanism. This discovery opened the door to a streamlined and efficient method for error alerting, which could be achieved with minimal adjustments to the existing infrastructure.
 
-## Note
+In this blog, I will guide you through the process of creating a custom logger specifically designed for error notifications. This approach requires the implementation of merely two files, showcasing the simplicity and elegance of the solution. Through this method, we successfully established a more professional, unified error handling system that enhanced our application's reliability and maintainability.
 
-- The previous/next post links at bottom of the template are currently sorted by date. One could explore modifying the template to refer the reader to the previous/next post in the series, rather than by date.
+## Introduction to Logback Appenders
+
+Logback is a widely used logging framework in Java applications, providing a flexible and fast logging environment. An appender in Logback is a component responsible for writing the logging events to a destination like a file, console, database, or even sending alerts. These destinations provide insights into the application's behavior and can be crucial for debugging and monitoring purposes.
+
+## Writing a Custom Appender in a Spring Boot Service
+
+Spring Boot, with its convention over configuration philosophy, simplifies the integration of Logback by automatically configuring it based on the classpath and the environment. However, there are scenarios where the out-of-the-box appenders do not meet specific requirements, necessitating the creation of a custom appender. Writing your own appender allows for a tailored logging solution, such as sending logs to a unique monitoring tool or, as in our case, sending an email when an error is logged.
+
+## Creating the Custom Logback Appender
+
+Our goal is to create a custom Logback appender that sends an email when an error is logged. Additionally, this appender will keep track of the last 20 logs, providing context along with the error notification. Here’s how you can do it:
+
+### Step 1: Implement the Appender
+
+First, you need to extend the `AppenderBase<E>` class provided by Logback. The type parameter `E` is the event type that your appender will handle. For most cases, including ours, it will be `ILoggingEvent`.
+
+```java
+import ch.qos.logback.core.AppenderBase;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import java.util.LinkedList;
+import java.util.Queue;
+
+public class EmailNotificationAppender extends AppenderBase<ILoggingEvent> {
+
+    private final LinkedList<String> logQueue = new LinkedList<>();
+
+    private static final int BUFFER_SIZE = 20;
+
+    private Layout<ILoggingEvent> layout;
+
+    boolean suppressEmail = System.getenv("SPRING_PROFILE_ACTIVE") == null;
+
+    @Override
+    protected void append(ILoggingEvent eventObject) {
+        String formattedMessage = layout.doLayout(loggingEvent);
+        synchronized(logQueue) {
+            if(logQueue.size() >= BUFFER_SIZE) {
+                logQueue.removeFirst();
+            }
+            logQueue.addLast(formattedMessage);
+        }
+        // IF SPRING_PROFILE_ACTIVE is null, env is local, do not send email
+        Level sendEmailLevel = Level.ERROR;
+        if(loggingEvent.getLevel().equals(sendEmailLevel) && !suppressEmail){
+            sendErrorLog(logQueue);
+        }
+    }
+
+    public void setEmailUrl(String emailUrl) {this.emailUrl = emailUrl;}
+    public void setLocalEmailUrl(String localEmailUrl) {this.localEmailUrl = localEmailUrl;}
+    public void setEmailTo(String emailTo) {this.emailTo = Arrays.asList(emailTo.split(","));}
+    public void setEmailFrom(String emailFrom) {this.emailFrom = emailFrom;}
+    public void setLayout(Layout<ILoggingEvent> layout) {this.layout = layout;}
+
+
+    private void sendErrorEmail(Queue<String> logQueue, ILoggingEvent errorEvent) {
+        StringBuilder paylod = new StringBuilder();
+        synchronized (cyclicBuffer) {
+            for(String log: cyclicBuffer){
+                payload.append(log);
+            }
+
+            HashMap<String, Object> email = new HashMap<>();
+            String subject = String.format("[%s] ERROR service-name", System.getenv("SPRING_PROFILE_ACTIVE"));
+
+            email.put("subject", subject)
+            email.put("htmlFlag", false);
+            email.put("tos", this.emailTo);
+            email.put("from", this.emailFrom);
+            email.put("body", payload.toString());
+
+            // Send your email
+        }
+    }
+}
+```
+
+## Defining the Logback XML File
+
+Finally, you'll need to configure Logback to use your custom appender alongside the standard console appender. This is done in the `logback-spring.xml` file located in the `src/main/resources` directory. The configuration should define both your custom appender and the standard console appender to ensure that regular logs are not affected by the addition of your custom functionality.
+
+```xml
+<configuration debug="true">
+    <property name="emailTo" value="receiver@email.com"/>
+    <property name="emailFrom" value="sender@email.com"/>
+    <property name="localEmailUrl" value="local end point that you would like to hit if needed or different from prod"/>
+    <property name="emailUrl" value="the normal url that you use to send emails"/>
+
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="EMAIL" class="com.yourpackage.EmailNotificationAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %5level %logger{36} - %msg %kvp%n</pattern>
+        </layout>
+        <emailTo>${emailTo}</emailTo>
+        <emailFrom>${emailFrom}</emailFrom>
+        <localEmailUrl>${localEmailUrl}</localEmailUrl>
+        <emailUrl>${emailUrl}</emailUrl>
+
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="EMAIL" />
+    </root>
+</configuration>
+```
+
+The `<root>` tag's level attribute dictates the minimum level of logs that will be processed by the appenders. Both the console and the email appenders are referenced here, meaning that all INFO level logs (and higher) will be output to the console, but only ERROR level logs will trigger the email notification.
+
+## Conclusion
+
+Creating a custom Logback appender in a Spring Boot application allows for flexible and powerful logging solutions tailored to specific needs. By following the steps outlined above, developers can enhance their application's monitoring and error reporting capabilities, ensuring that critical issues are never missed.
