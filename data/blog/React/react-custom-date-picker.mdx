@@ -1,0 +1,345 @@
+---
+title: Building a React Cron Job Scheduler
+date: '2024-02-07'
+tags: ['Javascript', 'React', 'How To']
+draft: false
+layout: PostBanner
+images: ['/static/images/cron/coding.jpeg']
+summary: 'Learn how to build a react cron scheduler component!'
+---
+
+## Problem
+
+I was working on a custom solution for scheduling cron jobs on a daily, weekly, and monthly frequency. I couldnt find a react library that met my user requirements.
+
+## Solution
+
+I built my own 🙂
+
+## Overview
+
+Cron jobs are an essential feature of any backend system that requires tasks to be run at specific intervals.
+Here I will walk you through the process of building a Cron Scheduler component in React that allows users to configure job frequencies.
+
+## Preview
+
+<div className="-mx-3 flex flex-wrap overflow-hidden xl:-mx-3">
+  <div className="my-1 w-1/3 overflow-hidden px-2 xl:my-1 xl:px-2">
+    ![Maple](/static/images/cron/daily.png)
+  </div>
+  <div className="my-1 w-1/3 overflow-hidden px-2 xl:my-1 xl:px-2">
+    ![Lake](/static/images/cron/weekly.png)
+  </div>
+  <div className="my-1 w-1/3 overflow-hidden px-2 xl:my-1 xl:px-2">
+    ![Mountains](/static/images/cron/monthly.png)
+  </div>
+</div>
+
+## The React Cron Scheduler Component
+
+Our `CronScheduler` component will allow users to select the frequency of the task (`daily`, `weekly`, or `monthly`), specify the time of day to run the task, and choose specific days of the week or month if needed.
+It also has the ability to be `enabled` or `disabled` by the parent component.
+
+### Prerequisites
+
+Before diving into the code, ensure you have a basic understanding of React and its hooks system (`useState`, `useEffect`, and `useRef`), as well as a working React environment.
+
+### Step 1: Setting Up the Component
+
+Start by importing necessary hooks and CSS for styling:
+
+```jsx
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+import './CronScheduler.css'
+```
+
+#### CSS File
+
+```css
+.cron-scheduler {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: #ffffff;
+  padding: 1rem;
+  border-radius: 5px;
+  width: 300px;
+}
+
+.cron-scheduler select,
+.cron-scheduler input,
+.cron-scheduler button {
+  padding: 10px;
+  border: 1px solid #ebebeb;
+  border-radius: 5px;
+  background-color: #ffffff;
+}
+
+.cron-scheduler button {
+  background-color: #ff5a5f;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.day-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.day {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 5px;
+  border: 1px solid #ebebeb;
+}
+
+.day.disabled {
+  background-color: #ebebeb;
+  color: #9e9e9e;
+  cursor: not-allowed;
+  border: 1px solid #ebebeb;
+}
+
+.day.selected {
+  background-color: #ff5a5f;
+  color: #ffffff;
+}
+```
+
+### Step 2: Initializing State
+
+Use the `useState` hook to initialize the component's state based on props. In this case the variable p is the props passed down to the component.
+
+```jsx
+const [frequency, setFrequency] = useState(p.frequency)
+const [time, setTime] = useState(`${p.hour}:${p.minute}`)
+const [days, setDays] = useState(p.days)
+const [months, setMonths] = useState(p.months)
+```
+
+### Step 3: Using Refs to Store Previous State Values
+
+`useRef` is utilized to keep track of previous state values for comparison purposes:
+
+```jsx
+const prevFrequency = useRef(p.frequency)
+const prevTime = useRef(`${p.hour}:${p.minute}`)
+const prevDays = useRef(p.days)
+const prevMonths = useRef(p.months)
+```
+
+### Step 4: Handling State Changes and Effects
+
+Define a `handleSave` function using `useCallback` to bundle the state into an object and trigger a callback (`p.onSave`) with this object. The (`p.onSave`) method is a function from the parent component that updates the value of the state variable `frequency` in the parent component:
+
+```jsx
+const handleSave = useCallback(() => {
+  let [hour, minute] = time.split(':')
+  let day_of_week = days?.filter((i) => i !== '').join(',')
+  let day_of_month = months.filter((i) => i !== '').join(',')
+  let frequencyObject = {
+    type: frequency,
+    hour: hour,
+    minute: minute,
+    day_of_week: day_of_week,
+    day: day_of_month,
+  }
+  // Call the onSave prop with the frequency object
+  p.onSave(frequencyObject)
+}, [time, days, months, frequency, p])
+```
+
+Use `useEffect` to detect changes in state and perform actions accordingly. This includes comparing current state with previous state and updating refs:
+
+```jsx
+useEffect(() => {
+  // Function to compare arrays
+  const arraysEqual = (a, b) => JSON.stringify(a) === JSON.stringify(b)
+
+  // Check if any value is different from its previous value
+  if (
+    frequency !== prevFrequency.current ||
+    time !== prevTime.current ||
+    !arraysEqual(days, prevDays.current) ||
+    !arraysEqual(months, prevMonths.current)
+  ) {
+    handleSave()
+  }
+
+  // Update refs with current state
+  prevFrequency.current = frequency
+  prevTime.current = time
+  prevDays.current = days
+  prevMonths.current = months
+}, [frequency, time, days, months, handleSave])
+```
+
+### Step 5: Building the UI
+
+Create the component's UI, incorporating conditional rendering to display elements based on the `frequency` state:
+
+```jsx
+return (
+  <div className="cron-scheduler">
+    {/* Frequency selector */}
+    {/* Time input */}
+    {/* Conditional rendering for "weekly" and "monthly" specific UI */}
+  </div>
+)
+```
+
+- **Frequency Selector:** A dropdown to select the frequency (`daily`, `weekly`, `monthly`).
+- **Time Input:** An input field for selecting time.
+- **Day/Month Selectors:** Conditional UI elements that appear based on the selected frequency.
+
+### Putting It All Together
+
+```jsx
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+import './CronScheduler.css'
+
+const CronScheduler = (p) => {
+  const [frequency, setFrequency] = useState(p.frequency)
+  const [time, setTime] = useState(`${p.hour}:${p.minute}`)
+  const [days, setDays] = useState(p.days)
+  const [months, setMonths] = useState(p.months)
+
+  // Refs to store the previous state values
+  const prevFrequency = useRef(p.frequency)
+  const prevTime = useRef(`${p.hour}:${p.minute}`)
+  const prevDays = useRef(p.days)
+  const prevMonths = useRef(p.months)
+
+  console.log('Frequency: ', frequency)
+  console.log('Days: ', days)
+  console.log('Months: ', months)
+
+  const handleSave = useCallback(() => {
+    let [hour, minute] = time.split(':')
+    let day_of_week = days?.filter((i) => i !== '').join(',')
+    let day_of_month = months.filter((i) => i !== '').join(',')
+    let frequencyObject = {
+      type: frequency,
+      hour: hour,
+      minute: minute,
+      day_of_week: day_of_week,
+      day: day_of_month,
+    }
+    // Call the onSave prop with the frequency object
+    p.onSave(frequencyObject)
+  }, [time, days, months, frequency, p])
+
+  useEffect(() => {
+    // Function to compare arrays
+    const arraysEqual = (a, b) => JSON.stringify(a) === JSON.stringify(b)
+
+    // Check if any value is different from its previous value
+    if (
+      frequency !== prevFrequency.current ||
+      time !== prevTime.current ||
+      !arraysEqual(days, prevDays.current) ||
+      !arraysEqual(months, prevMonths.current)
+    ) {
+      handleSave()
+    }
+
+    // Update refs with current state
+    prevFrequency.current = frequency
+    prevTime.current = time
+    prevDays.current = days
+    prevMonths.current = months
+  }, [frequency, time, days, months, handleSave])
+  return (
+    <div className="cron-scheduler">
+      <label>
+        <b>Select Frequency:</b>
+      </label>
+      <select
+        disabled={p.disabled}
+        value={frequency}
+        onChange={(e) => {
+          setFrequency(e.target.value)
+          setDays([])
+          setMonths([])
+        }}
+      >
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+      </select>
+
+      <label>
+        <b>Select Time:</b>
+      </label>
+      <input
+        disabled={p.disabled}
+        type="time"
+        value={time}
+        onChange={(e) => {
+          console.log('TIME:', e.target.value)
+          setTime(e.target.value)
+        }}
+      />
+
+      {frequency === 'weekly' && (
+        <div className={`day-selector ${p.disabled ? 'disabled' : ''}`}>
+          {['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'].map((day, index) => (
+            <div
+              key={index}
+              className={`day ${days.includes(day) ? 'selected' : ''} ${
+                p.disabled ? 'disabled' : ''
+              }`}
+              onClick={() => {
+                if (!p.disabled) {
+                  if (days.includes(day)) setDays((prevDays) => prevDays.filter((d) => d !== day))
+                  else setDays((prevDays) => [...prevDays, day])
+                }
+              }}
+            >
+              {day}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {frequency === 'monthly' && (
+        <div className={`day-selector ${p.disabled ? 'disabled' : ''}`}>
+          {Array.from({ length: 31 }).map((_, index) => (
+            <div
+              key={index}
+              className={`day ${months.includes(String(index + 1)) ? 'selected' : ''} ${
+                p.disabled ? 'disabled' : ''
+              }`}
+              onClick={() => {
+                if (!p.disabled) {
+                  if (months.includes(String(index + 1))) {
+                    setMonths((prevMonths) => prevMonths.filter((m) => m !== String(index + 1)))
+                  } else {
+                    setMonths((prevMonths) => [...prevMonths, String(index + 1)])
+                  }
+                }
+              }}
+            >
+              {index + 1}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default CronScheduler
+```
+
+### Conclusion
+
+We covered how to build a `CronScheduler` component in React, focusing on managing state with hooks, handling user input, and dynamically rendering UI elements based on state.
+If you have any questions or suggestions feel free to reach via linkedin.
+
+Good luck building!

@@ -10,7 +10,7 @@ const siteMetadata = {
   siteUrl: 'https://tailwind-nextjs-starter-blog.vercel.app',
   siteRepo: 'https://github.com/timlrx/tailwind-nextjs-starter-blog',
   // siteLogo: '/static/images/logo.png',
-  socialBanner: '/static/images/twitter-card.png',
+  socialBanner: '/static/images/Juan-angel-suarez.png',
   mastodon: 'https://mastodon.social/@mastodonuser',
   email: 'address@yoursite.com',
   github: 'https://github.com/Jange1l',
@@ -27,7 +27,7 @@ const siteMetadata = {
     // supports Plausible, Simple Analytics, Umami, Posthog or Google Analytics.
     umamiAnalytics: {
       // We use an env variable for this site to avoid other users cloning our analytics ID
-      umamiWebsiteId: process.env.NEXT_UMAMI_ID, // e.g. 123e4567-e89b-12d3-a456-426614174000
+      umamiWebsiteId: 'c455c28e-03e7-4e14-9e2e-d6cd99516d2a',
       // You may also need to overwrite the script if you're storing data in the US - ex:
       // src: 'https://us.umami.is/script.js'
       // Remember to add 'us.umami.is' in `next.config.js` as a permitted domain for the CSP
