@@ -12,14 +12,12 @@ const projectsData: Project[] = [
     imgSrc: '/static/images/time-machine.jpg',
     href: 'https://www.nftbldr.com/',
   },
-  // {
-  //   title: 'The Time Machine',
-  //   description: `Imagine being able to travel back in time or to the future. Simple turn the knob
-  //   to the desired date and press "Go". No more worrying about lost keys or
-  //   forgotten headphones with this simple yet affordable solution.`,
-  //   imgSrc: '/static/images/time-machine.jpg',
-  //   href: '/blog/the-time-machine',
-  // },
+  {
+    title: 'Debriefs Search Engine',
+    description: `Use the power of semantic search to find the latest news articles and news letters on the topics you want!`,
+    imgSrc: '/static/images/searc-debriefs.png',
+    href: 'https://search.debriefs.ai/',
+  },
 ]
 
 export default projectsData
