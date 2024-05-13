@@ -7,8 +7,8 @@ const siteMetadata = {
     'Welcome! Here I will share my thoughts, opinions, and discoveries on different technologies as I navigate through the journey of software engineering.',
   language: 'en-us',
   theme: 'system', // system, dark or light
-  siteUrl: 'https://tailwind-nextjs-starter-blog.vercel.app',
-  siteRepo: 'https://github.com/timlrx/tailwind-nextjs-starter-blog',
+  siteUrl: 'https://www.juansuarez.me/',
+  siteRepo: 'https://github.com/Jange1l/blog-v1',
   // siteLogo: '/static/images/logo.png',
   socialBanner: '/static/images/Juan-angel-suarez.png',
   mastodon: 'https://mastodon.social/@mastodonuser',
@@ -25,23 +25,9 @@ const siteMetadata = {
     // If you want to use an analytics provider you have to add it to the
     // content security policy in the `next.config.js` file.
     // supports Plausible, Simple Analytics, Umami, Posthog or Google Analytics.
-    umamiAnalytics: {
-      // We use an env variable for this site to avoid other users cloning our analytics ID
-      umamiWebsiteId: 'c455c28e-03e7-4e14-9e2e-d6cd99516d2a',
-      // You may also need to overwrite the script if you're storing data in the US - ex:
-      // src: 'https://us.umami.is/script.js'
-      // Remember to add 'us.umami.is' in `next.config.js` as a permitted domain for the CSP
+    googleAnalytics: {
+      googleAnalyticsId: 'G-GVM8FWY8TR', // e.g. G-XXXXXXX
     },
-    // plausibleAnalytics: {
-    //   plausibleDataDomain: '', // e.g. tailwind-nextjs-starter-blog.vercel.app
-    // },
-    // simpleAnalytics: {},
-    // posthogAnalytics: {
-    //   posthogProjectApiKey: '', // e.g. 123e4567-e89b-12d3-a456-426614174000
-    // },
-    // googleAnalytics: {
-    //   googleAnalyticsId: '', // e.g. G-XXXXXXX
-    // },
   },
   newsletter: {
     // supports mailchimp, buttondown, convertkit, klaviyo, revue, emailoctopus
