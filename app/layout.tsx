@@ -77,13 +77,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000" />
       <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
 
-      {/* <Script async src="https://www.googletagmanager.com/gtag/js?id=G-GVM8FWY8TR"></Script>
-      <Script id="google-analytics">
-        {`window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-          gtag('config', 'G-GVM8FWY8TR');`}
-      </Script> */}
       <body className="bg-white text-black antialiased dark:bg-gray-950 dark:text-white">
         <ThemeProviders>
           <Analytics analyticsConfig={siteMetadata.analytics as AnalyticsConfig} />

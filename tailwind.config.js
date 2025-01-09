@@ -25,8 +25,19 @@ module.exports = {
         sans: ['var(--font-space-grotesk)', ...fontFamily.sans],
       },
       colors: {
-        primary: colors.pink,
-        gray: colors.gray,
+        primary: colors.blue,
+        secondary: colors.slate,
+        accent: colors.emerald,
+        gray: colors.zinc,
+      },
+      backdropFilter: {
+        none: 'none',
+        blur: 'blur(20px)',
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'tech-pattern':
+          'linear-gradient(to right, #0f172a 1px, transparent 1px), linear-gradient(to bottom, #0f172a 1px, transparent 1px)',
       },
       typography: ({ theme }) => ({
         DEFAULT: {

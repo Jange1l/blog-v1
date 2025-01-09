@@ -33,3 +33,13 @@ input:-webkit-autofill:focus {
 .katex-display {
   overflow: auto hidden;
 }
+
+@layer utilities {
+  .glass-card {
+    @apply rounded-xl border border-gray-200 bg-white/80 shadow-lg backdrop-blur-lg dark:border-gray-800 dark:bg-gray-900/80;
+  }
+
+  .text-gradient {
+    @apply to-accent-500 bg-gradient-to-r from-primary-500 bg-clip-text text-transparent;
+  }
+}
