@@ -12,7 +12,7 @@ export default function Home({ posts }) {
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
         <div className="space-y-2 pb-8 pt-6 md:space-y-5">
           <h1 className="text-4xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-5xl sm:leading-10 md:text-7xl md:leading-14">
-            <span className="to-accent-500 bg-gradient-to-r from-primary-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent">
               Latest Posts
             </span>
           </h1>

@@ -10,10 +10,10 @@ summary: 'sample summary'
 - pros and cons of the different types
 - the traditional approach of using openai
 - the alternative
--- running your own model on a beffier server to have unlimited access to embeddings 
--- model size considerations
--- MTEB link 
-- cost analysis 
+  -- running your own model on a beffier server to have unlimited access to embeddings
+  -- model size considerations
+  -- MTEB link
+- cost analysis
 
 ---
 
@@ -47,17 +47,17 @@ Text embeddings can be broadly classified into a few types, each with unique cha
 Each embedding model comes with its set of strengths and weaknesses:
 
 - **Word2Vec**
-  - *Pros:* Efficient at capturing context within a specific window and relatively simple to train.
-  - *Cons:* Does not account for word meanings based on surrounding words beyond the target context window.
+  - _Pros:_ Efficient at capturing context within a specific window and relatively simple to train.
+  - _Cons:_ Does not account for word meanings based on surrounding words beyond the target context window.
 - **GloVe**
-  - *Pros:* Captures both local and global statistics of a corpus, providing richer representations.
-  - *Cons:* Less effective in domain-specific applications where the co-occurrence of words is less predictable.
+  - _Pros:_ Captures both local and global statistics of a corpus, providing richer representations.
+  - _Cons:_ Less effective in domain-specific applications where the co-occurrence of words is less predictable.
 - **FastText**
-  - *Pros:* Better handling of rare words through subword techniques.
-  - *Cons:* Can be slower and more resource-intensive to train than Word2Vec.
+  - _Pros:_ Better handling of rare words through subword techniques.
+  - _Cons:_ Can be slower and more resource-intensive to train than Word2Vec.
 - **BERT and Transformers**
-  - *Pros:* Provides contextually rich embeddings that understand the syntax and semantics more deeply.
-  - *Cons:* Requires significant computational resources to train and fine-tune.
+  - _Pros:_ Provides contextually rich embeddings that understand the syntax and semantics more deeply.
+  - _Cons:_ Requires significant computational resources to train and fine-tune.
 
 ### The Traditional Approach: Using OpenAI
 

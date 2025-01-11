@@ -1,1 +1,15 @@
-{"react":2,"python":4,"projects":1,"nlp":3,"embeddings":2,"how-to":3,"llm":2,"javascript":1,"java":1,"spring-boot":1,"logback":1,"duck-typing":1,"best-practices":1}
+{
+  "react": 2,
+  "python": 4,
+  "projects": 1,
+  "nlp": 3,
+  "embeddings": 2,
+  "how-to": 3,
+  "llm": 2,
+  "javascript": 1,
+  "java": 1,
+  "spring-boot": 1,
+  "logback": 1,
+  "duck-typing": 1,
+  "best-practices": 1
+}
