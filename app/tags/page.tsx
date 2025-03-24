@@ -18,18 +18,13 @@ export default async function Page() {
             Tags
           </h1>
         </div>
-        <div className="flex max-w-lg flex-wrap">
+        <div className="gap-tag-gap flex max-w-lg flex-wrap">
           {tagKeys.length === 0 && 'No tags found.'}
           {sortedTags.map((t) => {
             return (
-              <div key={t} className="mb-2 mr-5 mt-2">
-                <Tag text={t} />
-                <Link
-                  href={`/tags/${slug(t)}`}
-                  className="-ml-2 text-sm font-semibold uppercase text-gray-600 dark:text-gray-300"
-                  aria-label={`View posts tagged ${t}`}
-                >
-                  {` (${tagCounts[t]})`}
+              <div key={t}>
+                <Link href={`/tags/${slug(t)}`} aria-label={`View posts tagged ${t}`}>
+                  <Tag text={`${t} (${tagCounts[t]})`} />
                 </Link>
               </div>
             )

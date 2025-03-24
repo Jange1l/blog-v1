@@ -110,6 +110,20 @@ export const Blog = defineDocumentType(() => ({
   },
 }))
 
+export const InProgress = defineDocumentType(() => ({
+  name: 'InProgress',
+  filePathPattern: 'inProgress/**/*.mdx',
+  contentType: 'mdx',
+  fields: {
+    title: { type: 'string', required: false },
+    date: { type: 'date', required: false },
+    tags: { type: 'list', of: { type: 'string' }, default: [] },
+    draft: { type: 'boolean', default: true },
+    summary: { type: 'string', required: false },
+  },
+  computedFields,
+}))
+
 export const Authors = defineDocumentType(() => ({
   name: 'Authors',
   filePathPattern: 'authors/**/*.mdx',
@@ -130,7 +144,7 @@ export const Authors = defineDocumentType(() => ({
 
 export default makeSource({
   contentDirPath: 'data',
-  documentTypes: [Blog, Authors],
+  documentTypes: [Blog, Authors, InProgress],
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [

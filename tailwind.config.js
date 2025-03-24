@@ -15,6 +15,9 @@ module.exports = {
   darkMode: 'class',
   theme: {
     extend: {
+      spacing: {
+        'tag-gap': '0.75rem',
+      },
       lineHeight: {
         11: '2.75rem',
         12: '3rem',

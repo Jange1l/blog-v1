@@ -12,7 +12,7 @@ const siteMetadata = {
   // siteLogo: '/static/images/logo.png',
   socialBanner: '/static/images/Juan-angel-suarez.png',
   mastodon: 'https://mastodon.social/@mastodonuser',
-  email: 'address@yoursite.com',
+  email: 'juan@equiply.io',
   github: 'https://github.com/Jange1l',
   twitter: 'https://x.com/j_ange1_?s=21&t=SEaNvF6c_tZxHLxuA_-RfA',
   facebook: 'https://facebook.com',
