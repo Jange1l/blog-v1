@@ -1,2 +1,11 @@
-node_modules
-.eslintrc.js
+# Next.js build folder
+.next/
+# Output directory
+out/
+# Dependencies
+node_modules/
+# Contentlayer
+.contentlayer/
+
+# Snake game component with exhaustive deps warning
+app/snake-game/components/Snake.tsx

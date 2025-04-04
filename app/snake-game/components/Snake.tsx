@@ -26,7 +26,7 @@ export function Snake({ positions }: SnakeProps) {
         ${Math.floor(b * 255 * (1 - gradientPosition * 0.2))}
       )`
     })
-  }, [positions.length])
+  }, [positions])
 
   // Define the head segment separately for special effects
   const head = positions[0]
