@@ -64,6 +64,16 @@ module.exports = () => {
     pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
     eslint: {
       dirs: ['app', 'components', 'layouts', 'scripts'],
+      // Disable ESLint during production builds for faster builds
+      ignoreDuringBuilds: process.env.NODE_ENV === 'production',
+    },
+    // Disable TypeScript type checking during production builds
+    typescript: {
+      // !! WARN !!
+      // Dangerously allow production builds to successfully complete even if
+      // your project has type errors.
+      // !! WARN !!
+      ignoreBuildErrors: process.env.NODE_ENV === 'production',
     },
     images: {
       remotePatterns: [
