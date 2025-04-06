@@ -1,25 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
-import dbConnect from '../../auth/lib/dbConnect'
-import User from '../../auth/models/User'
+import { supabaseAdmin, checkEnvVars } from '../../lib/supabase'
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
-    await dbConnect()
+    // Check environment variables
+    checkEnvVars()
 
     // Get the top 10 scores
     const limit = 10
 
-    // Query users sorted by highestScore in descending order
-    const topUsers = await User.find({ highestScore: { $gt: 0 } })
-      .select('username highestScore')
-      .sort({ highestScore: -1 })
+    // Query users sorted by highest_score in descending order
+    const { data: topUsers, error } = await supabaseAdmin
+      .from('users')
+      .select('username, highest_score')
+      .gt('highest_score', 0)
+      .order('highest_score', { ascending: false })
       .limit(limit)
-    console.log('topUsers: ', topUsers)
+
+    if (error) {
+      console.error('Error fetching leaderboard:', error)
+      return NextResponse.json({ error: 'Failed to fetch leaderboard' }, { status: 500 })
+    }
+
     // Format the response
     const leaderboard = topUsers.map((user, index) => ({
       rank: index + 1,
       username: user.username,
-      score: user.highestScore,
+      score: user.highest_score,
     }))
 
     return NextResponse.json({
