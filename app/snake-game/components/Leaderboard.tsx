@@ -23,7 +23,7 @@ export function Leaderboard() {
         setError(null)
 
         const response = await fetch('/api/scores/leaderboard')
-
+        console.log('Response: ', response)
         if (!response.ok) {
           throw new Error('Failed to fetch leaderboard')
         }

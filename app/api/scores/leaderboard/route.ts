@@ -14,7 +14,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       .select('username highestScore')
       .sort({ highestScore: -1 })
       .limit(limit)
-
+    console.log('topUsers: ', topUsers)
     // Format the response
     const leaderboard = topUsers.map((user, index) => ({
       rank: index + 1,
