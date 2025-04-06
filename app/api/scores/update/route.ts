@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import dbConnect from '../../auth/lib/dbConnect'
-import User from '../../auth/models/User'
 import { requireAuth } from '../../auth/lib/jwt'
+import { supabaseAdmin, checkEnvVars } from '../../lib/supabase'
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
+    // Check environment variables
+    checkEnvVars()
+
     // Check authentication
     const user = await requireAuth(req)
 
@@ -20,19 +22,29 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Invalid score' }, { status: 400 })
     }
 
-    await dbConnect()
+    // Get the current user from Supabase
+    const { data: dbUser, error: userError } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('id', user.userId)
+      .single()
 
-    // Find user and update highest score if the new score is higher
-    const dbUser = await User.findById(user.userId)
-
-    if (!dbUser) {
+    if (userError || !dbUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     // Only update if the new score is higher
-    if (score > dbUser.highestScore) {
-      dbUser.highestScore = score
-      await dbUser.save()
+    if (score > dbUser.highest_score) {
+      // Update the highest score
+      const { error: updateError } = await supabaseAdmin
+        .from('users')
+        .update({ highest_score: score })
+        .eq('id', user.userId)
+
+      if (updateError) {
+        console.error('Error updating score:', updateError)
+        return NextResponse.json({ error: 'Failed to update score' }, { status: 500 })
+      }
 
       return NextResponse.json({
         success: true,
@@ -45,7 +57,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({
       success: true,
       message: 'Score recorded but not a new high score',
-      highestScore: dbUser.highestScore,
+      highestScore: dbUser.highest_score,
     })
   } catch (error) {
     console.error('Update score error:', error)

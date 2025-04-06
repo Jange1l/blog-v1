@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import dbConnect from '../lib/dbConnect'
-import User from '../models/User'
 import { requireAuth } from '../lib/jwt'
+import { supabaseAdmin, checkEnvVars } from '../../lib/supabase'
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
+    // Check environment variables
+    checkEnvVars()
+
     // Check authentication
     const user = await requireAuth(req)
 
@@ -12,22 +14,24 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    await dbConnect()
+    // Get user from Supabase
+    const { data: dbUser, error } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('id', user.userId)
+      .single()
 
-    // Find user in DB to get up-to-date info including the latest score
-    const dbUser = await User.findById(user.userId).select('-password')
-
-    if (!dbUser) {
+    if (error || !dbUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     return NextResponse.json({
       success: true,
       user: {
-        id: dbUser._id,
+        id: dbUser.id,
         username: dbUser.username,
         email: dbUser.email,
-        highestScore: dbUser.highestScore,
+        highestScore: dbUser.highest_score,
       },
     })
   } catch (error) {
