@@ -51,142 +51,37 @@ export function GameController({ orbitControlsRef }: GameControllerProps) {
   const [showSettings, setShowSettings] = useState<boolean>(false)
   const [showPathPredictor, setShowPathPredictor] = useState<boolean>(true)
   const [showPathGuidelines, setShowPathGuidelines] = useState<boolean>(true)
-  const [aiSimulation, setAiSimulation] = useState<boolean>(false)
-  const [viewMode] = useState<string>('free') // Always use free camera mode
 
   const lastUpdateTime = useRef<number>(0)
   const lastDirection = useRef<Vector3>(direction)
-  const cameraPositionRef = useRef<Vector3>(new Vector3(15, 15, 15))
 
   const { user, updateScore } = useAuth()
   const [isNewHighScore, setIsNewHighScore] = useState(false)
 
-  // AI simulation algorithm
-  const calculateAiDirection = () => {
-    if (snake.length === 0 || gameOver) return null
-
-    const head = snake[0]
-
-    // Calculate the difference between the snake head and the food
-    const diffX = food.x - head.x
-    const diffY = food.y - head.y
-    const diffZ = food.z - head.z
-
-    // First try to move along the axis with the largest difference
-    // This creates a simple but effective pathfinding algorithm
-    let preferredDirection: Vector3 | null = null
-
-    // Check if we're already aligned on 2 axes and just need to move on the third
-    if (Math.abs(diffX) > 0 && Math.abs(diffY) === 0 && Math.abs(diffZ) === 0) {
-      preferredDirection = new Vector3(Math.sign(diffX), 0, 0)
-    } else if (Math.abs(diffY) > 0 && Math.abs(diffX) === 0 && Math.abs(diffZ) === 0) {
-      preferredDirection = new Vector3(0, Math.sign(diffY), 0)
-    } else if (Math.abs(diffZ) > 0 && Math.abs(diffX) === 0 && Math.abs(diffY) === 0) {
-      preferredDirection = new Vector3(0, 0, Math.sign(diffZ))
-    }
-    // If not perfectly aligned, prioritize the largest difference
-    else {
-      // First try X axis if it has the largest difference
+  // Check if a move would cause collision with snake or boundaries
+  const checkCollision = useCallback(
+    (nextHead: Vector3): boolean => {
+      // Check boundary collision
+      const halfGrid = gridSize / 2
       if (
-        Math.abs(diffX) >= Math.abs(diffY) &&
-        Math.abs(diffX) >= Math.abs(diffZ) &&
-        Math.abs(diffX) > 0
+        Math.abs(nextHead.x) > halfGrid ||
+        Math.abs(nextHead.y) > halfGrid ||
+        Math.abs(nextHead.z) > halfGrid
       ) {
-        preferredDirection = new Vector3(Math.sign(diffX), 0, 0)
-      }
-      // Then try Y axis
-      else if (
-        Math.abs(diffY) >= Math.abs(diffX) &&
-        Math.abs(diffY) >= Math.abs(diffZ) &&
-        Math.abs(diffY) > 0
-      ) {
-        preferredDirection = new Vector3(0, Math.sign(diffY), 0)
-      }
-      // Then try Z axis
-      else if (Math.abs(diffZ) > 0) {
-        preferredDirection = new Vector3(0, 0, Math.sign(diffZ))
-      }
-    }
-
-    // If we found a direction, check if it would cause collision
-    if (preferredDirection) {
-      // Check if this direction would cause a 180-degree turn
-      if (vectorsEqual(preferredDirection, lastDirection.current.clone().multiplyScalar(-1))) {
-        preferredDirection = null
-      } else {
-        // Check if moving in this direction would cause collision with self
-        const nextHead = head.clone().add(preferredDirection)
-        if (snake.slice(1).some((segment) => vectorsEqual(segment, nextHead))) {
-          preferredDirection = null
-        }
-
-        // Check boundary collision
-        if (
-          Math.abs(nextHead.x) > gridSize / 2 ||
-          Math.abs(nextHead.y) > gridSize / 2 ||
-          Math.abs(nextHead.z) > gridSize / 2
-        ) {
-          preferredDirection = null
-        }
-      }
-    }
-
-    // If our preferred direction would cause collision, try other axes
-    if (!preferredDirection) {
-      const possibleDirections = [
-        new Vector3(1, 0, 0),
-        new Vector3(-1, 0, 0),
-        new Vector3(0, 1, 0),
-        new Vector3(0, -1, 0),
-        new Vector3(0, 0, 1),
-        new Vector3(0, 0, -1),
-      ]
-
-      // Filter out directions that cause collision
-      const validDirections = possibleDirections.filter((dir) => {
-        // Exclude 180-degree turns
-        if (vectorsEqual(dir, lastDirection.current.clone().multiplyScalar(-1))) {
-          return false
-        }
-
-        // Check self collision
-        const nextHead = head.clone().add(dir)
-        if (snake.slice(1).some((segment) => vectorsEqual(segment, nextHead))) {
-          return false
-        }
-
-        // Check boundary collision
-        if (
-          Math.abs(nextHead.x) > gridSize / 2 ||
-          Math.abs(nextHead.y) > gridSize / 2 ||
-          Math.abs(nextHead.z) > gridSize / 2
-        ) {
-          return false
-        }
-
         return true
-      })
-
-      if (validDirections.length > 0) {
-        // Choose the direction that gets us closest to the food
-        const bestDirection = validDirections.reduce((best, dir) => {
-          const nextHead = head.clone().add(dir)
-          const currentDistance = nextHead.distanceTo(food)
-          const bestDistance = head.clone().add(best).distanceTo(food)
-
-          return currentDistance < bestDistance ? dir : best
-        }, validDirections[0])
-
-        preferredDirection = bestDirection
       }
-    }
 
-    return preferredDirection
-  }
+      // Check self collision - excluding the tail which will move
+      return snake.slice(0, -1).some((segment) => vectorsEqual(segment, nextHead))
+    },
+    [snake, gridSize]
+  )
 
   // Handle keyboard input
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Common key handling (regardless of game state)
+
       // Toggle path predictor with F key
       if (e.key === 'f' || e.key === 'F') {
         setShowPathPredictor(!showPathPredictor)
@@ -199,22 +94,9 @@ export function GameController({ orbitControlsRef }: GameControllerProps) {
         return
       }
 
-      // Toggle AI simulation with A key
-      if (e.key === 'a' || e.key === 'A') {
-        // Only toggle if Alt key is pressed to avoid conflict with movement
-        if (e.altKey) {
-          setAiSimulation(!aiSimulation)
-          // When enabling AI, unpause the game if it's paused
-          if (isPaused && !aiSimulation) {
-            setIsPaused(false)
-          }
-          return
-        }
-      }
-
       // Game state checks - don't process movement if paused, in settings, or game over
       if (isPaused || showSettings || gameOver) {
-        // Skip to the settings/pause/game over controls
+        // Settings/pause/game over controls
         if (e.key === 'Tab') {
           e.preventDefault() // Prevent focus change
           setShowSettings(!showSettings)
@@ -224,7 +106,7 @@ export function GameController({ orbitControlsRef }: GameControllerProps) {
           return
         }
 
-        // Settings are shown, handle settings-specific controls
+        // Settings-specific controls
         if (showSettings) {
           if (e.key === 'Escape') {
             setShowSettings(false)
@@ -234,12 +116,10 @@ export function GameController({ orbitControlsRef }: GameControllerProps) {
           // Grid size controls
           if (e.key === '[' && gridSize > MIN_GRID_SIZE) {
             setGridSize(gridSize - 1)
-            // Don't regenerate food on grid size change
             return
           }
           if (e.key === ']' && gridSize < MAX_GRID_SIZE) {
             setGridSize(gridSize + 1)
-            // Don't regenerate food on grid size change
             return
           }
 
@@ -252,153 +132,50 @@ export function GameController({ orbitControlsRef }: GameControllerProps) {
             setGameSpeed(Math.min(6, gameSpeed + 0.5))
             return
           }
-          return
+
+          return // No further processing while in settings
         }
 
-        // Game is over, handle restart
-        if (gameOver) {
-          if (e.key === 'r' || e.key === 'R') {
-            // Restart game
-            setSnake(INITIAL_SNAKE)
-            setDirection(INITIAL_DIRECTION)
-            setGameOver(false)
-            setScore(0)
-            setIsPaused(true) // Start paused to allow initialization
-            lastDirection.current = INITIAL_DIRECTION
-
-            // Generate new food position after a delay
-            foodProcessedRef.current = false
-            window.setTimeout(() => {
-              const newFoodPosition = generateFood(INITIAL_SNAKE, gridSize)
-              setFood(newFoodPosition)
-              foodProcessedRef.current = true
-
-              // Resume game after food is generated
-              window.setTimeout(() => {
-                setIsPaused(false)
-              }, 300)
-            }, 200)
+        // Pause/Unpause with P key
+        if (e.key === 'p' || e.key === 'P') {
+          if (!gameOver) {
+            setIsPaused(!isPaused)
           }
           return
         }
 
-        // Pause/resume game
-        if (e.key === 'p' || e.key === 'P') {
-          setIsPaused(!isPaused)
+        // Restart game with R key if game over
+        if ((e.key === 'r' || e.key === 'R') && gameOver) {
+          handleRestart()
           return
         }
 
-        return
+        return // No further processing while paused or game over
       }
 
-      // If AI simulation is active, don't process movement keys
-      if (aiSimulation) {
-        // But still allow pausing
-        if (e.key === 'p' || e.key === 'P') {
-          setIsPaused(!isPaused)
-          return
-        }
-        return
-      }
+      // Normal movement controls when game is active
+      const key = e.key.toLowerCase() // Case-insensitive key handling
 
-      // SIMPLIFIED CONTROL SYSTEM - process only if game is active
+      if (DIRECTIONS[key]) {
+        const newDirection = DIRECTIONS[key]
 
-      // Handle cardinal direction movements (WASD/Arrows)
-      // These always control XY plane regardless of current movement
-      let newDirection: Vector3 | null = null
-
-      switch (e.key) {
-        // North (up) - always positive Y
-        case 'ArrowUp':
-        case 'w':
-        case 'W':
-          newDirection = new Vector3(0, 1, 0)
-          break
-
-        // South (down) - always negative Y
-        case 'ArrowDown':
-        case 's':
-        case 'S':
-          newDirection = new Vector3(0, -1, 0)
-          break
-
-        // West (left) - always negative X
-        case 'ArrowLeft':
-        case 'a':
-        case 'A':
-          newDirection = new Vector3(-1, 0, 0)
-          break
-
-        // East (right) - always positive X
-        case 'ArrowRight':
-        case 'd':
-        case 'D':
-          newDirection = new Vector3(1, 0, 0)
-          break
-
-        // Z-axis controls - Q/E always control Z regardless of current direction
-        case 'q':
-        case 'Q':
-          newDirection = new Vector3(0, 0, 1)
-          break
-
-        case 'e':
-        case 'E':
-          newDirection = new Vector3(0, 0, -1)
-          break
-
-        // Other controls
-        case 'Tab':
-          e.preventDefault() // Prevent focus change
-          setShowSettings(!showSettings)
-          setIsPaused(true)
-          return
-
-        case 'p':
-        case 'P':
-          setIsPaused(!isPaused)
-          return
-
-        default:
-          // No recognized key pressed
-          return
-      }
-
-      // If we have a new direction, check if it's valid and update
-      if (newDirection) {
-        // Prevent 180-degree turns (can't go directly backwards)
+        // Prevent 180-degree turns (don't allow reversing direction)
         if (!vectorsEqual(newDirection, lastDirection.current.clone().multiplyScalar(-1))) {
           setDirection(newDirection)
         }
       }
+
+      // Pause with P key
+      if (e.key === 'p' || e.key === 'P') {
+        setIsPaused(true)
+      }
     }
 
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [
-    gameOver,
-    isPaused,
-    showSettings,
-    gridSize,
-    gameSpeed,
-    showPathPredictor,
-    showPathGuidelines,
-    aiSimulation,
-    viewMode,
-  ])
-
-  // Handle game over with score tracking
-  const handleGameOver = () => {
-    setGameOver(true)
-
-    // Update user's score if authenticated
-    if (user && score > 0) {
-      // Check if it's a new high score for the user
-      updateScore(score).then((isNewHighScore) => {
-        setIsNewHighScore(isNewHighScore)
-      })
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
     }
-  }
+  }, [isPaused, gameOver, showSettings, gridSize, gameSpeed, showPathPredictor, showPathGuidelines])
 
   // Game loop
   useFrame(({ clock }) => {
@@ -408,17 +185,7 @@ export function GameController({ orbitControlsRef }: GameControllerProps) {
     if (currentTime - lastUpdateTime.current < 1 / gameSpeed) return
 
     lastUpdateTime.current = currentTime
-
-    // If AI simulation is active, calculate and set the AI's next direction
-    if (aiSimulation && !gameOver) {
-      const aiDirection = calculateAiDirection()
-      if (aiDirection) {
-        setDirection(aiDirection)
-        lastDirection.current = aiDirection
-      }
-    } else {
-      lastDirection.current = direction
-    }
+    lastDirection.current = direction
 
     // Move snake
     const head = snake[0].clone()
@@ -473,17 +240,41 @@ export function GameController({ orbitControlsRef }: GameControllerProps) {
     setSnake(newSnake)
   })
 
+  // Game over handler
+  const handleGameOver = () => {
+    setGameOver(true)
+
+    // Check if we need to update high score
+    if (user && updateScore && score > 0) {
+      // Handle the Promise properly by using .then()
+      updateScore(score)
+        .then((result) => {
+          setIsNewHighScore(result)
+        })
+        .catch((err) => {
+          console.error('Error updating score:', err)
+        })
+    }
+  }
+
+  // Close settings
   const closeSettings = () => {
     setShowSettings(false)
-    if (gameOver === false) {
+    if (!gameOver) {
       setIsPaused(false)
     }
   }
 
-  // Reset the new high score flag when restarting
+  // Restart game
   const handleRestart = () => {
-    // ... existing restart code ...
+    setSnake(INITIAL_SNAKE)
+    setDirection(INITIAL_DIRECTION)
+    lastDirection.current = INITIAL_DIRECTION
+    setGameOver(false)
+    setScore(0)
     setIsNewHighScore(false)
+    setFood(generateFood(INITIAL_SNAKE, gridSize))
+    foodProcessedRef.current = false
   }
 
   return (
@@ -518,39 +309,108 @@ export function GameController({ orbitControlsRef }: GameControllerProps) {
       {gameOver && !showSettings && (
         <group position={[0, 0, 5]}>
           <Text
-            position={[0, 0, 0]}
+            position={[0, 2, 0]}
             color={COLORS.gameOver}
-            fontSize={1.2}
+            fontSize={1.5}
             anchorX="center"
             anchorY="middle"
-            outlineWidth={0.05}
+            outlineWidth={0.08}
             outlineColor="#000"
           >
-            Game Over! Press R to restart
+            GAME OVER
           </Text>
+
+          {/* Game stats panel */}
+          <mesh position={[0, -0.5, -0.5]} rotation={[0.1, 0, 0]}>
+            <planeGeometry args={[8, 5]} />
+            <meshBasicMaterial color="#0f172a" opacity={0.85} transparent />
+          </mesh>
+
+          {/* Final score with larger display */}
           <Text
-            position={[0, -1.5, 0]}
+            position={[0, 0.8, 0]}
             color={COLORS.text}
-            fontSize={0.7}
+            fontSize={0.9}
             anchorX="center"
             anchorY="middle"
           >
             Final Score: {score}
           </Text>
 
-          {/* Show high score notification if it's a new high score */}
-          {isNewHighScore && (
+          {/* Snake length stat */}
+          <Text
+            position={[0, 0, 0]}
+            color={COLORS.text}
+            fontSize={0.6}
+            anchorX="center"
+            anchorY="middle"
+          >
+            Snake Length: {snake.length}
+          </Text>
+
+          {/* Game difficulty */}
+          <Text
+            position={[0, -0.8, 0]}
+            color={
+              gameSpeed >= 5
+                ? COLORS.difficultyHard
+                : gameSpeed >= 3.5
+                  ? COLORS.difficultyMedium
+                  : COLORS.difficultyEasy
+            }
+            fontSize={0.6}
+            anchorX="center"
+            anchorY="middle"
+          >
+            Difficulty: {gameSpeed >= 5 ? 'Hard' : gameSpeed >= 3.5 ? 'Medium' : 'Easy'}
+          </Text>
+
+          {/* Restart prompt with pulsating effect */}
+          <group position={[0, -2, 0]}>
             <Text
-              position={[0, -2.5, 0]}
-              color="#FFD700" // Gold color for high score
+              color="#FFFFFF"
               fontSize={0.7}
               anchorX="center"
               anchorY="middle"
               outlineWidth={0.03}
               outlineColor="#000"
             >
-              New High Score!
+              Press R to restart
             </Text>
+
+            {/* Animated subtle arrow pointing to text */}
+            <mesh position={[-3.5, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+              <coneGeometry args={[0.2, 0.5, 8]} />
+              <meshBasicMaterial color={COLORS.buttonHighlight} />
+            </mesh>
+
+            <mesh position={[3.5, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
+              <coneGeometry args={[0.2, 0.5, 8]} />
+              <meshBasicMaterial color={COLORS.buttonHighlight} />
+            </mesh>
+          </group>
+
+          {/* Show high score notification if it's a new high score */}
+          {isNewHighScore && (
+            <>
+              <Text
+                position={[0, -3.5, 0]}
+                color="#FFD700" // Gold color for high score
+                fontSize={0.9}
+                anchorX="center"
+                anchorY="middle"
+                outlineWidth={0.05}
+                outlineColor="#000"
+              >
+                New High Score!
+              </Text>
+
+              {/* Crown icon for high score */}
+              <mesh position={[0, -3.5, -0.5]} rotation={[0, 0, 0]}>
+                <sphereGeometry args={[0.5, 16, 16]} />
+                <meshBasicMaterial color="#FFD700" transparent opacity={0.3} />
+              </mesh>
+            </>
           )}
         </group>
       )}
@@ -582,9 +442,9 @@ export function GameController({ orbitControlsRef }: GameControllerProps) {
         Score: {score}
       </Text>
 
-      {/* Camera mode indicator */}
+      {/* 3D Position Indicator */}
       <Text
-        position={[-gridSize / 2 - 1, gridSize / 2 + 1.5, 0]}
+        position={[0, gridSize / 2 + 0.7, 0]}
         color={COLORS.text}
         fontSize={0.5}
         anchorX="center"
@@ -592,8 +452,36 @@ export function GameController({ orbitControlsRef }: GameControllerProps) {
         outlineWidth={0.02}
         outlineColor="#000"
       >
-        [Camera: Free]
+        Position: x:{snake[0]?.x.toFixed(0)} y:{snake[0]?.y.toFixed(0)} z:{snake[0]?.z.toFixed(0)}
       </Text>
+
+      {/* Difficulty indicator */}
+      {(() => {
+        let difficultyText = 'Easy'
+        let difficultyColor = COLORS.difficultyEasy
+
+        if (gameSpeed >= 5) {
+          difficultyText = 'Hard'
+          difficultyColor = COLORS.difficultyHard
+        } else if (gameSpeed >= 3.5) {
+          difficultyText = 'Medium'
+          difficultyColor = COLORS.difficultyMedium
+        }
+
+        return (
+          <Text
+            position={[gridSize / 2 + 1, gridSize / 2 + 0.8, 0]}
+            color={difficultyColor}
+            fontSize={0.5}
+            anchorX="center"
+            anchorY="middle"
+            outlineWidth={0.02}
+            outlineColor="#000"
+          >
+            {difficultyText} (Speed: {gameSpeed.toFixed(1)})
+          </Text>
+        )
+      })()}
 
       {/* Path indicator toggle */}
       <Text
@@ -623,25 +511,6 @@ export function GameController({ orbitControlsRef }: GameControllerProps) {
         [Guidelines: {showPathGuidelines ? 'On' : 'Off'}]
       </Text>
 
-      {/* AI Simulation toggle */}
-      <Text
-        position={[-gridSize / 2 - 1, gridSize / 2 - 0.4, 0]}
-        color={aiSimulation ? COLORS.foodGlow : COLORS.text}
-        fontSize={0.5}
-        anchorX="center"
-        anchorY="middle"
-        outlineWidth={0.02}
-        outlineColor="#000"
-        onClick={() => {
-          setAiSimulation(!aiSimulation)
-          if (isPaused && !aiSimulation) {
-            setIsPaused(false)
-          }
-        }}
-      >
-        [AI: {aiSimulation ? 'On' : 'Off'}]
-      </Text>
-
       {/* Settings button */}
       <Text
         position={[gridSize / 2 + 1, gridSize / 2 + 1.5, 0]}
@@ -659,7 +528,7 @@ export function GameController({ orbitControlsRef }: GameControllerProps) {
         [Settings]
       </Text>
 
-      {/* Controls info - update to include G key for guidelines toggle */}
+      {/* Controls info */}
       <Text
         position={[0, -gridSize / 2 - 1.5, 0]}
         color={COLORS.text}
@@ -669,8 +538,7 @@ export function GameController({ orbitControlsRef }: GameControllerProps) {
         outlineWidth={0.02}
         outlineColor="#000"
       >
-        Controls: Arrow/WASD = N/S/E/W | Q = Up/E = Down | F: Path | G: Guidelines | Alt+A: AI |
-        Tab: Settings
+        Controls: Arrow/WASD = N/S/E/W | Q = Up/E = Down | F: Path | G: Guidelines | Tab: Settings
       </Text>
     </EnhancedScene>
   )

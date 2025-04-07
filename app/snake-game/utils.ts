@@ -20,16 +20,11 @@ export const DIRECTIONS: Record<string, Vector3> = {
   s: new Vector3(0, -1, 0),
   a: new Vector3(-1, 0, 0),
   d: new Vector3(1, 0, 0),
-  W: new Vector3(0, 1, 0),
-  S: new Vector3(0, -1, 0),
-  A: new Vector3(-1, 0, 0),
-  D: new Vector3(1, 0, 0),
+  // No need to duplicate uppercase mappings, we can handle case-insensitivity in the key handler
 
-  // Z-axis controls
-  q: new Vector3(0, 0, -1),
-  e: new Vector3(0, 0, 1),
-  Q: new Vector3(0, 0, -1),
-  E: new Vector3(0, 0, 1),
+  // Z-axis controls - inverted as requested
+  q: new Vector3(0, 0, -1), // Forward into the screen (negative Z)
+  e: new Vector3(0, 0, 1), // Backward out of the screen (positive Z)
 }
 
 // Check if two vectors are equal
@@ -38,24 +33,16 @@ export const vectorsEqual = (v1: Vector3, v2: Vector3): boolean =>
 
 // Function to generate random food position in 3D
 export const generateFood = (snake: Vector3[], gridSize: number): Vector3 => {
+  const halfGrid = Math.floor(gridSize / 2)
   let position: Vector3
+
   do {
-    const halfGrid = Math.floor(gridSize / 2)
     position = new Vector3(
       Math.floor(Math.random() * gridSize) - halfGrid,
       Math.floor(Math.random() * gridSize) - halfGrid,
       Math.floor(Math.random() * gridSize) - halfGrid
     )
-
-    // Check if position is within bounds
-    if (
-      Math.abs(position.x) > halfGrid ||
-      Math.abs(position.y) > halfGrid ||
-      Math.abs(position.z) > halfGrid
-    ) {
-      // If out of bounds, regenerate
-      continue
-    }
+    // We don't need explicit bounds checking as the random calculation already ensures it's within grid bounds
   } while (snake.some((segment) => vectorsEqual(segment, position)))
 
   return position

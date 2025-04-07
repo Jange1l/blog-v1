@@ -1,7 +1,6 @@
-import React, { useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
-import { SpotLight, Sparkles, Stars, Text, Line } from '@react-three/drei'
-import { Vector3, SpotLight as ThreeSpotLight } from 'three'
+import React from 'react'
+import { Sparkles, Stars, Text, Line } from '@react-three/drei'
+import { Vector3 } from 'three'
 import { COLORS } from '../utils'
 
 interface EnhancedSceneProps {
@@ -11,39 +10,6 @@ interface EnhancedSceneProps {
 }
 
 export function EnhancedScene({ children, gridSize, gameOver }: EnhancedSceneProps) {
-  // References for animating lights with proper types
-  const spotLight1 = useRef<ThreeSpotLight>(null)
-  const spotLight2 = useRef<ThreeSpotLight>(null)
-  const spotLight3 = useRef<ThreeSpotLight>(null)
-
-  // Animation for lighting
-  useFrame(({ clock }) => {
-    const t = clock.getElapsedTime()
-
-    // Orbit lights around the scene
-    if (spotLight1.current && spotLight2.current && spotLight3.current) {
-      const radius = gridSize * 1.5
-
-      // First spotlight orbits in XZ plane
-      spotLight1.current.position.x = Math.sin(t * 0.2) * radius
-      spotLight1.current.position.z = Math.cos(t * 0.2) * radius
-      spotLight1.current.target.position.set(0, 0, 0)
-      spotLight1.current.target.updateMatrixWorld()
-
-      // Second spotlight orbits in XY plane
-      spotLight2.current.position.x = Math.sin(t * 0.1) * radius
-      spotLight2.current.position.y = Math.cos(t * 0.1) * radius
-      spotLight2.current.target.position.set(0, 0, 0)
-      spotLight2.current.target.updateMatrixWorld()
-
-      // Third spotlight orbits in YZ plane
-      spotLight3.current.position.y = Math.sin(t * 0.15) * radius
-      spotLight3.current.position.z = Math.cos(t * 0.15) * radius
-      spotLight3.current.target.position.set(0, 0, 0)
-      spotLight3.current.target.updateMatrixWorld()
-    }
-  })
-
   // Calculate positions based on grid size
   const halfGrid = gridSize / 2
   const areaSize = gridSize * 1.5
@@ -207,39 +173,14 @@ export function EnhancedScene({ children, gridSize, gameOver }: EnhancedScenePro
       {coordinateGrids()}
       {axisLabels()}
 
-      {/* Dynamic Lighting */}
-      <SpotLight
-        ref={spotLight1}
-        position={[halfGrid * 1.5, halfGrid, 0]}
-        angle={0.5}
-        penumbra={0.8}
-        intensity={0.7}
-        distance={gridSize * 4}
-        color="#6366f1"
-        castShadow
-      />
-
-      <SpotLight
-        ref={spotLight2}
-        position={[0, halfGrid * 1.5, halfGrid]}
-        angle={0.6}
-        penumbra={0.6}
-        intensity={0.7}
-        distance={gridSize * 4}
+      {/* Static lighting setup */}
+      <directionalLight position={[halfGrid, halfGrid, halfGrid]} intensity={0.7} color="#6366f1" />
+      <directionalLight
+        position={[-halfGrid, halfGrid, -halfGrid]}
+        intensity={0.5}
         color="#8b5cf6"
-        castShadow
       />
-
-      <SpotLight
-        ref={spotLight3}
-        position={[-halfGrid * 1.5, 0, halfGrid]}
-        angle={0.5}
-        penumbra={0.7}
-        intensity={0.7}
-        distance={gridSize * 4}
-        color="#0ea5e9"
-        castShadow
-      />
+      <directionalLight position={[0, -halfGrid, halfGrid]} intensity={0.5} color="#0ea5e9" />
 
       {/* Additional global light for better visibility */}
       <directionalLight position={[halfGrid * 3, halfGrid * 3, halfGrid * 3]} intensity={0.3} />

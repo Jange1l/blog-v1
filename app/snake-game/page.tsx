@@ -69,13 +69,13 @@ export default function SnakeGamePage() {
                         <span className="font-mono bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded">
                           Q
                         </span>{' '}
-                        - Move up in 3D space
+                        - Move forward (into screen) in 3D space
                       </li>
                       <li>
                         <span className="font-mono bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded">
                           E
                         </span>{' '}
-                        - Move down in 3D space
+                        - Move backward (out of screen) in 3D space
                       </li>
                     </ul>
                   </div>
@@ -139,15 +139,15 @@ export default function SnakeGamePage() {
                     <ul className="list-disc pl-5 text-gray-600 dark:text-gray-400 space-y-1">
                       <li>
                         <span className="font-mono bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded">
-                          C
-                        </span>{' '}
-                        - Toggle camera mode (Free/Auto)
-                      </li>
-                      <li>
-                        <span className="font-mono bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded">
                           F
                         </span>{' '}
                         - Toggle path visualization
+                      </li>
+                      <li>
+                        <span className="font-mono bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded">
+                          G
+                        </span>{' '}
+                        - Toggle grid guidelines
                       </li>
                       <li>
                         Use <span className="font-semibold">mouse drag</span> to rotate camera view
