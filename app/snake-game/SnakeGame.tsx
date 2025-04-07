@@ -2,7 +2,7 @@
 
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, Stars } from '@react-three/drei'
+import { OrbitControls, Stars, Text, Center } from '@react-three/drei'
 import { Vector3 } from 'three'
 import { COLORS } from './utils'
 import { GameController } from './components/GameController'
@@ -19,20 +19,16 @@ export default function SnakeGame() {
   const toggleFullScreen = useCallback(() => {
     if (!document.fullscreenElement) {
       // Enter fullscreen
-      if (gameContainerRef.current?.requestFullscreen) {
-        gameContainerRef.current
-          .requestFullscreen()
-          .then(() => setIsFullScreen(true))
-          .catch((err) => console.error(`Error attempting to enable fullscreen: ${err.message}`))
-      }
+      gameContainerRef.current
+        ?.requestFullscreen()
+        .then(() => setIsFullScreen(true))
+        .catch((err) => console.error(`Error attempting to enable fullscreen: ${err.message}`))
     } else {
       // Exit fullscreen
-      if (document.exitFullscreen) {
-        document
-          .exitFullscreen()
-          .then(() => setIsFullScreen(false))
-          .catch((err) => console.error(`Error attempting to exit fullscreen: ${err.message}`))
-      }
+      document
+        .exitFullscreen()
+        .then(() => setIsFullScreen(false))
+        .catch((err) => console.error(`Error attempting to exit fullscreen: ${err.message}`))
     }
   }, [])
 
@@ -48,21 +44,100 @@ export default function SnakeGame() {
     }
   }, [])
 
+  // Reset camera to default position
+  const resetCamera = () => {
+    if (orbitControlsRef.current) {
+      // @ts-ignore (TypeScript doesn't know about the target property)
+      orbitControlsRef.current.target.set(0, 0, 0)
+      // @ts-ignore
+      orbitControlsRef.current.object.position.set(25, 25, 25)
+      // @ts-ignore
+      orbitControlsRef.current.update()
+    }
+  }
+
   if (!gameStarted) {
     return (
-      <div className="flex flex-col items-center justify-center h-full bg-gray-900 text-white">
-        <h2 className="text-4xl font-bold mb-6 text-gradient bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
-          3D Snake Game
-        </h2>
-        <p className="mb-8 text-lg text-center max-w-md">
-          Navigate in 3D space, collect gems, and avoid hitting yourself or the boundaries.
-        </p>
-        <button
-          onClick={() => setGameStarted(true)}
-          className="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-xl font-medium transition-colors shadow-lg hover:shadow-xl transform hover:scale-105"
-        >
-          Start Game
-        </button>
+      <div className="relative h-full w-full">
+        {/* 3D Preview Canvas */}
+        <Canvas camera={{ position: [10, 10, 10], fov: 40 }}>
+          <color attach="background" args={[COLORS.background]} />
+          <ambientLight intensity={0.5} />
+          <pointLight position={[10, 10, 10]} intensity={0.8} color="#ffffff" />
+
+          {/* Simple grid preview */}
+          {[...Array(3)].map((_, i) => (
+            <mesh key={`grid-${i}`} position={[0, 0, 0]}>
+              <boxGeometry args={[4, 0.05, 4]} />
+              <meshStandardMaterial color={COLORS.grid} transparent opacity={0.15} />
+            </mesh>
+          ))}
+
+          {/* 3D Title */}
+          <Center position={[0, 1.5, 0]}>
+            <Text
+              fontSize={1.2}
+              color={COLORS.snakeHead}
+              anchorX="center"
+              anchorY="middle"
+              outlineWidth={0.05}
+              outlineColor="#000"
+            >
+              3D SNAKE
+            </Text>
+          </Center>
+
+          {/* Background star effect */}
+          <Stars radius={50} depth={50} count={1000} factor={4} saturation={0.5} fade />
+
+          {/* Allow camera control in the preview */}
+          <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={0.5} />
+        </Canvas>
+
+        {/* UI Overlay */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-4">
+          <div className="bg-gray-900 bg-opacity-80 p-8 rounded-xl backdrop-blur-sm max-w-lg w-full shadow-2xl border border-indigo-500/30">
+            <h2 className="text-4xl font-bold mb-6 text-gradient bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
+              3D Snake Game
+            </h2>
+            <p className="mb-6 text-lg text-gray-200">
+              Navigate in 3D space, collect gems, and avoid hitting yourself or the boundaries.
+            </p>
+
+            {/* Key Controls Summary */}
+            <div className="mb-6 grid grid-cols-2 gap-3 text-gray-300 text-sm">
+              <div>
+                <span className="inline-block bg-gray-800 px-2 py-1 rounded mr-2 font-mono">
+                  Arrows/WASD
+                </span>
+                <span>2D Movement</span>
+              </div>
+              <div>
+                <span className="inline-block bg-gray-800 px-2 py-1 rounded mr-2 font-mono">
+                  Q/E
+                </span>
+                <span>Z-axis Movement</span>
+              </div>
+              <div>
+                <span className="inline-block bg-gray-800 px-2 py-1 rounded mr-2 font-mono">
+                  F/G
+                </span>
+                <span>Toggle Visual Guides</span>
+              </div>
+              <div>
+                <span className="inline-block bg-gray-800 px-2 py-1 rounded mr-2 font-mono">P</span>
+                <span>Pause Game</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setGameStarted(true)}
+              className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-xl font-medium transition-colors shadow-lg hover:shadow-xl transform hover:scale-105 text-white"
+            >
+              Start Game
+            </button>
+          </div>
+        </div>
       </div>
     )
   }
@@ -78,7 +153,7 @@ export default function SnakeGame() {
         <pointLight position={[0, 0, 10]} intensity={0.3} color="#a5f3fc" />
         <pointLight position={[0, 20, 0]} intensity={0.4} color="#ffffff" />
 
-        {/* Reduce fog for better visibility from a distance */}
+        {/* Reduced fog for better visibility from a distance */}
         <fog attach="fog" args={[COLORS.background, 30, 60]} />
 
         {/* Star field background */}
@@ -102,16 +177,7 @@ export default function SnakeGame() {
 
       {/* Camera position reset button */}
       <button
-        onClick={() => {
-          if (orbitControlsRef.current) {
-            // @ts-ignore (TypeScript doesn't know about the target property)
-            orbitControlsRef.current.target.set(0, 0, 0)
-            // @ts-ignore
-            orbitControlsRef.current.object.position.set(25, 25, 25)
-            // @ts-ignore
-            orbitControlsRef.current.update()
-          }
-        }}
+        onClick={resetCamera}
         className="absolute bottom-4 left-4 z-10 p-2 bg-gray-800 text-white rounded-full hover:bg-gray-700 transition-colors"
         title="Reset Camera View"
       >

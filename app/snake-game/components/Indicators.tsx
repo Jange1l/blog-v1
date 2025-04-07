@@ -124,36 +124,6 @@ export function PathPredictor({ snakeHead, food }: PathPredictorProps) {
   )
 }
 
-// Movement plane indicator component
-interface MovementPlaneIndicatorProps {
-  movementPlane: string
-  gridSize: number
-}
-
-export function MovementPlaneIndicator({ movementPlane, gridSize }: MovementPlaneIndicatorProps) {
-  let planeText = 'XY'
-  let planeColor = COLORS.directionZ // Blue for XY plane (viewed from Z axis)
-
-  if (movementPlane === 'xz') {
-    planeText = 'XZ'
-    planeColor = COLORS.directionY // Green for XZ plane (viewed from Y axis)
-  }
-
-  return (
-    <Text
-      position={[-gridSize / 2 - 1, gridSize / 2 + 0.1, 0]}
-      color={planeColor}
-      fontSize={0.5}
-      anchorX="center"
-      anchorY="middle"
-      outlineWidth={0.02}
-      outlineColor="#000"
-    >
-      [Plane: {planeText}]
-    </Text>
-  )
-}
-
 // Path guidelines component to show possible directions in 3D space
 interface PathGuidelinesProps {
   gridSize: number
@@ -222,7 +192,7 @@ export function PathGuidelines({ gridSize, currentDirection, snakeHead }: PathGu
       />
     )
 
-    // Main coordinate axes at origin (for reference)
+    // Major coordinate axes at origin (for reference)
     if (Math.abs(snakeGridX) > 2 || Math.abs(snakeGridY) > 2 || Math.abs(snakeGridZ) > 2) {
       // Only show if snake is not too close to origin
       lines.push(
