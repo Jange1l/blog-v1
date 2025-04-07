@@ -50,7 +50,7 @@ export default function SnakeGame() {
       // @ts-ignore (TypeScript doesn't know about the target property)
       orbitControlsRef.current.target.set(0, 0, 0)
       // @ts-ignore
-      orbitControlsRef.current.object.position.set(25, 25, 25)
+      orbitControlsRef.current.object.position.set(28, 28, 28)
       // @ts-ignore
       orbitControlsRef.current.update()
     }
@@ -116,7 +116,7 @@ export default function SnakeGame() {
                 <span className="inline-block bg-gray-800 px-2 py-1 rounded mr-2 font-mono">
                   Q/E
                 </span>
-                <span>Z-axis Movement</span>
+                <span>Z-axis Movement (Q:Out, E:In)</span>
               </div>
               <div>
                 <span className="inline-block bg-gray-800 px-2 py-1 rounded mr-2 font-mono">
@@ -144,7 +144,7 @@ export default function SnakeGame() {
 
   return (
     <div ref={gameContainerRef} className="relative h-full w-full">
-      <Canvas camera={{ position: [25, 25, 25], fov: 35 }}>
+      <Canvas camera={{ position: [30, 30, 30], fov: 35 }}>
         {/* Environment setup for better lighting and atmosphere */}
         <color attach="background" args={[COLORS.background]} />
         <ambientLight intensity={0.5} />
@@ -165,7 +165,7 @@ export default function SnakeGame() {
           enableZoom={true}
           enablePan={false}
           minDistance={15}
-          maxDistance={40}
+          maxDistance={60}
           autoRotate={false}
           enableDamping={true}
           dampingFactor={0.05}

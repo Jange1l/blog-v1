@@ -31,6 +31,8 @@ export function GameController({ orbitControlsRef }: GameControllerProps) {
   const [direction, setDirection] = useState<Vector3>(INITIAL_DIRECTION)
   const [gridSize, setGridSize] = useState<number>(INITIAL_GRID_SIZE)
   const [gameSpeed, setGameSpeed] = useState<number>(INITIAL_GAME_SPEED)
+  const [countdown, setCountdown] = useState<number>(3)
+  const [gameStarted, setGameStarted] = useState<boolean>(false)
 
   // Initialize food with a fixed position that won't change unless explicitly set
   const initialFood = useMemo(() => generateFood(INITIAL_SNAKE, INITIAL_GRID_SIZE), [])
@@ -57,6 +59,31 @@ export function GameController({ orbitControlsRef }: GameControllerProps) {
 
   const { user, updateScore } = useAuth()
   const [isNewHighScore, setIsNewHighScore] = useState(false)
+
+  // Initialize camera position on mount
+  useEffect(() => {
+    if (orbitControlsRef.current) {
+      // @ts-ignore (TypeScript doesn't know about these OrbitControls properties)
+      orbitControlsRef.current.object.position.set(gridSize * 2, gridSize * 1.5, gridSize * 2)
+      // @ts-ignore
+      orbitControlsRef.current.target.set(0, 0, 0)
+      // @ts-ignore
+      orbitControlsRef.current.update()
+    }
+  }, [gridSize, orbitControlsRef])
+
+  // Handle countdown timer
+  useEffect(() => {
+    if (countdown > 0 && !gameStarted && !gameOver && !isPaused) {
+      const timer = setTimeout(() => {
+        setCountdown(countdown - 1)
+      }, 1000)
+
+      return () => clearTimeout(timer)
+    } else if (countdown === 0 && !gameStarted) {
+      setGameStarted(true)
+    }
+  }, [countdown, gameStarted, gameOver, isPaused])
 
   // Check if a move would cause collision with snake or boundaries
   const checkCollision = useCallback(
@@ -179,7 +206,7 @@ export function GameController({ orbitControlsRef }: GameControllerProps) {
 
   // Game loop
   useFrame(({ clock }) => {
-    if (gameOver || isPaused || showSettings) return
+    if (gameOver || isPaused || showSettings || !gameStarted) return
 
     const currentTime = clock.getElapsedTime()
     if (currentTime - lastUpdateTime.current < 1 / gameSpeed) return
@@ -275,6 +302,18 @@ export function GameController({ orbitControlsRef }: GameControllerProps) {
     setIsNewHighScore(false)
     setFood(generateFood(INITIAL_SNAKE, gridSize))
     foodProcessedRef.current = false
+    setCountdown(3)
+    setGameStarted(false)
+
+    // Reset camera position
+    if (orbitControlsRef.current) {
+      // @ts-ignore (TypeScript doesn't know about these OrbitControls properties)
+      orbitControlsRef.current.object.position.set(gridSize * 2, gridSize * 1.5, gridSize * 2)
+      // @ts-ignore
+      orbitControlsRef.current.target.set(0, 0, 0)
+      // @ts-ignore
+      orbitControlsRef.current.update()
+    }
   }
 
   return (
@@ -287,13 +326,41 @@ export function GameController({ orbitControlsRef }: GameControllerProps) {
       <DirectionIndicator direction={direction} position={snake[0]} />
 
       {/* Path guidelines */}
-      {showPathGuidelines && !gameOver && !isPaused && (
+      {showPathGuidelines && !gameOver && !isPaused && gameStarted && (
         <PathGuidelines gridSize={gridSize} currentDirection={direction} snakeHead={snake[0]} />
       )}
 
       {/* Path predictor */}
-      {showPathPredictor && !gameOver && !isPaused && (
+      {showPathPredictor && !gameOver && !isPaused && gameStarted && (
         <PathPredictor snakeHead={snake[0]} food={food} />
+      )}
+
+      {/* Countdown Timer */}
+      {countdown > 0 && !gameStarted && !gameOver && !isPaused && (
+        <group position={[0, 0, 0]}>
+          <Text
+            position={[0, 0, 0]}
+            color={COLORS.gameOver}
+            fontSize={5}
+            anchorX="center"
+            anchorY="middle"
+            outlineWidth={0.2}
+            outlineColor="#000"
+          >
+            {countdown}
+          </Text>
+          <Text
+            position={[0, -3, 0]}
+            color={COLORS.text}
+            fontSize={1}
+            anchorX="center"
+            anchorY="middle"
+            outlineWidth={0.05}
+            outlineColor="#000"
+          >
+            Get Ready!
+          </Text>
+        </group>
       )}
 
       {/* Settings UI */}
