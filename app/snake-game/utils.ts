@@ -1,13 +1,13 @@
 import { Vector3 } from 'three'
 
 // Constants for the game
-export const INITIAL_GRID_SIZE = 14
+export const INITIAL_GRID_SIZE = 16
 export const MIN_GRID_SIZE = 10
 export const MAX_GRID_SIZE = 24
 export const CELL_SIZE = 1
 export const INITIAL_SNAKE = [new Vector3(0, 0, 0)]
 export const INITIAL_DIRECTION = new Vector3(1, 0, 0)
-export const INITIAL_GAME_SPEED = 3.0 // moves per second
+export const INITIAL_GAME_SPEED = 2.5 // moves per second
 
 // Direction mappings with additional Z-axis controls (q/e for up/down in 3D space)
 export const DIRECTIONS: Record<string, Vector3> = {
@@ -22,9 +22,9 @@ export const DIRECTIONS: Record<string, Vector3> = {
   d: new Vector3(1, 0, 0),
   // No need to duplicate uppercase mappings, we can handle case-insensitivity in the key handler
 
-  // Z-axis controls - inverted as requested
-  q: new Vector3(0, 0, -1), // Forward into the screen (negative Z)
-  e: new Vector3(0, 0, 1), // Backward out of the screen (positive Z)
+  // Z-axis controls - inverted
+  q: new Vector3(0, 0, 1), // Backward out of the screen (positive Z)
+  e: new Vector3(0, 0, -1), // Forward into the screen (negative Z)
 }
 
 // Check if two vectors are equal
