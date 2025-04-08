@@ -50,21 +50,21 @@ export const generateFood = (snake: Vector3[], gridSize: number): Vector3 => {
 
 // Color palette
 export const COLORS = {
-  background: '#0f172a', // Darker background for better contrast
-  grid: '#475569',
-  gridLines: '#94a3b8',
-  snakeHead: '#10b981', // Green
-  snakeBody: '#059669',
-  snakeTrail: '#047857', // Darker green for trail effect
-  food: '#f59e0b', // Amber/gold for food
-  foodGlow: '#fcd34d', // Light yellow glow
-  text: '#f1f5f9',
-  gameOver: '#ef4444',
-  buttonHighlight: '#3b82f6',
-  difficultyEasy: '#22c55e',
-  difficultyMedium: '#f59e0b',
-  difficultyHard: '#ef4444',
-  directionX: '#f87171', // Red for X axis
-  directionY: '#4ade80', // Green for Y axis
-  directionZ: '#60a5fa', // Blue for Z axis
+  background: '#0f172a', // Dark blue-gray background
+  grid: '#64748b', // Lighter grid color
+  gridLines: '#cbd5e1', // Even lighter grid lines
+  snakeHead: '#e2e8f0', // Bright white-ish for head
+  snakeBody: '#cbd5e1', // Light gray for body
+  snakeTrail: '#94a3b8', // Medium gray for trail effect
+  food: '#fb923c', // Brighter, more vibrant orange for food
+  foodGlow: '#fdba74', // Brighter orange glow
+  text: '#f1f5f9', // Keep light text
+  gameOver: '#ef4444', // Keep bright red for game over
+  buttonHighlight: '#3b82f6', // Keep blue for buttons
+  difficultyEasy: '#22c55e', // Keep green for easy
+  difficultyMedium: '#f59e0b', // Keep amber for medium
+  difficultyHard: '#ef4444', // Keep red for hard
+  directionX: '#f87171', // Keep red for X axis
+  directionY: '#4ade80', // Keep green for Y axis
+  directionZ: '#60a5fa', // Keep blue for Z axis
 }
