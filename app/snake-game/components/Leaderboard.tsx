@@ -22,8 +22,14 @@ export function Leaderboard() {
         setLoading(true)
         setError(null)
 
-        const response = await fetch('/api/scores/leaderboard')
-        console.log('Response: ', response)
+        const response = await fetch('/api/scores/leaderboard', {
+          cache: 'no-store',
+          headers: {
+            Pragma: 'no-cache',
+            'Cache-Control': 'no-cache',
+          },
+        })
+        console.log('Response: ', response.json())
         if (!response.ok) {
           throw new Error('Failed to fetch leaderboard')
         }

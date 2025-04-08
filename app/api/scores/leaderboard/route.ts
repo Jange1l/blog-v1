@@ -22,6 +22,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Failed to fetch leaderboard' }, { status: 500 })
     }
 
+    console.log('Top Users: ', topUsers)
     // Format the response
     const leaderboard = topUsers.map((user, index) => ({
       rank: index + 1,
@@ -29,10 +30,18 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       score: user.highest_score,
     }))
 
-    return NextResponse.json({
+    // Create response with cache control headers to prevent caching
+    const response = NextResponse.json({
       success: true,
       leaderboard,
     })
+
+    // Add cache control headers to prevent caching
+    response.headers.set('Cache-Control', 'no-store, max-age=0')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
+
+    return response
   } catch (error) {
     console.error('Leaderboard error:', error)
     return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
