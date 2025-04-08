@@ -63,7 +63,7 @@ export function EnhancedScene({ children, gridSize, gameOver }: EnhancedScenePro
   const coordinateGrids = () => {
     // Create lines for a faint coordinate grid
     const gridLines: JSX.Element[] = []
-    const spacing = 5 // Grid spacing
+    const spacing = 7 // Grid spacing
 
     // Only draw grid lines every 'spacing' units
     for (let i = -halfGrid; i <= halfGrid; i += spacing) {
@@ -74,40 +74,40 @@ export function EnhancedScene({ children, gridSize, gameOver }: EnhancedScenePro
         <Line
           key={`x-y-${i}`}
           points={[new Vector3(i, -halfGrid, 0), new Vector3(i, halfGrid, 0)]}
-          color="#1e293b"
+          color="#e2e8f0"
           lineWidth={1}
           opacity={0.3}
         />
       )
-      gridLines.push(
-        <Line
-          key={`y-x-${i}`}
-          points={[new Vector3(-halfGrid, i, 0), new Vector3(halfGrid, i, 0)]}
-          color="#1e293b"
-          lineWidth={1}
-          opacity={0.3}
-        />
-      )
+      // gridLines.push(
+      //   <Line
+      //     key={`y-x-${i}`}
+      //     points={[new Vector3(-halfGrid, i, 0), new Vector3(halfGrid, i, 0)]}
+      //     color="#1e293b"
+      //     lineWidth={1}
+      //     opacity={0.3}
+      //   />
+      // )
 
       // XZ plane lines (parallel to X and Z axes)
-      gridLines.push(
-        <Line
-          key={`x-z-${i}`}
-          points={[new Vector3(i, 0, -halfGrid), new Vector3(i, 0, halfGrid)]}
-          color="#1e293b"
-          lineWidth={1}
-          opacity={0.3}
-        />
-      )
-      gridLines.push(
-        <Line
-          key={`z-x-${i}`}
-          points={[new Vector3(-halfGrid, 0, i), new Vector3(halfGrid, 0, i)]}
-          color="#1e293b"
-          lineWidth={1}
-          opacity={0.3}
-        />
-      )
+      // gridLines.push(
+      //   <Line
+      //     key={`x-z-${i}`}
+      //     points={[new Vector3(i, 0, -halfGrid), new Vector3(i, 0, halfGrid)]}
+      //     color="#e2e8f0"
+      //     lineWidth={1}
+      //     opacity={0.3}
+      //   />
+      // )
+      // gridLines.push(
+      //   <Line
+      //     key={`z-x-${i}`}
+      //     points={[new Vector3(-halfGrid, 0, i), new Vector3(halfGrid, 0, i)]}
+      //     color="#e2e8f0"
+      //     lineWidth={1}
+      //     opacity={0.3}
+      //   />
+      // )
 
       // YZ plane lines (parallel to Y and Z axes)
       gridLines.push(
@@ -119,15 +119,15 @@ export function EnhancedScene({ children, gridSize, gameOver }: EnhancedScenePro
           opacity={0.3}
         />
       )
-      gridLines.push(
-        <Line
-          key={`z-y-${i}`}
-          points={[new Vector3(0, -halfGrid, i), new Vector3(0, halfGrid, i)]}
-          color="#1e293b"
-          lineWidth={1}
-          opacity={0.3}
-        />
-      )
+      // gridLines.push(
+      //   <Line
+      //     key={`z-y-${i}`}
+      //     points={[new Vector3(0, -halfGrid, i), new Vector3(0, halfGrid, i)]}
+      //     color="#1e293b"
+      //     lineWidth={1}
+      //     opacity={0.3}
+      //   />
+      // )
     }
 
     return gridLines

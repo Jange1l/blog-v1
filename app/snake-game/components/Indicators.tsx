@@ -114,11 +114,11 @@ export function PathPredictor({ snakeHead, food }: PathPredictorProps) {
         points={points}
         color="white"
         lineWidth={1}
-        opacity={0.3}
+        opacity={0.7}
         transparent
         dashed
-        dashSize={0.2}
-        gapSize={0.1}
+        dashSize={0.5}
+        gapSize={0.3}
       />
     </group>
   )
@@ -229,70 +229,70 @@ export function PathGuidelines({ gridSize, currentDirection, snakeHead }: PathGu
       )
     }
 
-    // Add a few spaced grid lines in each plane
-    // Only show 2-3 lines in each direction around the snake
+    // // // Add a few spaced grid lines in each plane
+    // // // Only show 2-3 lines in each direction around the snake
 
-    // Calculate range - just a few lines near the snake
-    const range = 4 // How many grid cells away from snake to show
-    const min = -range
-    const max = range
+    // // // Calculate range - just a few lines near the snake
+    // // const range = 4 // How many grid cells away from snake to show
+    // // const min = -range
+    // // const max = range
 
-    for (let offset = min; offset <= max; offset += spacing) {
-      if (offset === 0) continue // Skip the lines that pass through the snake (already drawn)
+    // // for (let offset = min; offset <= max; offset += spacing) {
+    // //   if (offset === 0) continue // Skip the lines that pass through the snake (already drawn)
 
-      const i = snakeGridX + offset
-      if (i >= -halfGrid && i <= halfGrid) {
-        // Vertical line in YZ plane at X=i
-        lines.push(
-          <Line
-            key={`yz-at-x-${i}`}
-            points={[new Vector3(i, -halfGrid, snakeGridZ), new Vector3(i, halfGrid, snakeGridZ)]}
-            color={COLORS.gridLines}
-            lineWidth={0.5}
-            dashed
-            dashSize={0.3}
-            dashScale={10}
-            opacity={0.08}
-          />
-        )
-      }
+    // //   const i = snakeGridX + offset
+    // //   if (i >= -halfGrid && i <= halfGrid) {
+    // //     // Vertical line in YZ plane at X=i
+    // //     lines.push(
+    // //       <Line
+    // //         key={`yz-at-x-${i}`}
+    // //         points={[new Vector3(i, -halfGrid, snakeGridZ), new Vector3(i, halfGrid, snakeGridZ)]}
+    // //         color={COLORS.gridLines}
+    // //         lineWidth={0.5}
+    // //         dashed
+    // //         dashSize={0.3}
+    // //         dashScale={10}
+    // //         opacity={0.08}
+    // //       />
+    // //     )
+    // //   }
 
-      const j = snakeGridY + offset
-      if (j >= -halfGrid && j <= halfGrid) {
-        // Horizontal line in XZ plane at Y=j
-        lines.push(
-          <Line
-            key={`xz-at-y-${j}`}
-            points={[new Vector3(-halfGrid, j, snakeGridZ), new Vector3(halfGrid, j, snakeGridZ)]}
-            color={COLORS.gridLines}
-            lineWidth={0.5}
-            dashed
-            dashSize={0.3}
-            dashScale={10}
-            opacity={0.08}
-          />
-        )
-      }
+    // //   const j = snakeGridY + offset
+    // //   if (j >= -halfGrid && j <= halfGrid) {
+    // //     // Horizontal line in XZ plane at Y=j
+    // //     lines.push(
+    // //       <Line
+    // //         key={`xz-at-y-${j}`}
+    // //         points={[new Vector3(-halfGrid, j, snakeGridZ), new Vector3(halfGrid, j, snakeGridZ)]}
+    // //         color={COLORS.gridLines}
+    // //         lineWidth={0.5}
+    // //         dashed
+    // //         dashSize={0.3}
+    // //         dashScale={10}
+    // //         opacity={0.08}
+    // //       />
+    // //     )
+    // //   }
 
-      const k = snakeGridZ + offset
-      if (k >= -halfGrid && k <= halfGrid) {
-        // Horizontal line in XY plane at Z=k
-        lines.push(
-          <Line
-            key={`xy-at-z-${k}`}
-            points={[new Vector3(snakeGridX, -halfGrid, k), new Vector3(snakeGridX, halfGrid, k)]}
-            color={COLORS.gridLines}
-            lineWidth={0.5}
-            dashed
-            dashSize={0.3}
-            dashScale={10}
-            opacity={0.08}
-          />
-        )
-      }
-    }
+    // //   const k = snakeGridZ + offset
+    // //   if (k >= -halfGrid && k <= halfGrid) {
+    // //     // Horizontal line in XY plane at Z=k
+    // //     lines.push(
+    // //       <Line
+    // //         key={`xy-at-z-${k}`}
+    // //         points={[new Vector3(snakeGridX, -halfGrid, k), new Vector3(snakeGridX, halfGrid, k)]}
+    // //         color={COLORS.gridLines}
+    // //         lineWidth={0.5}
+    // //         dashed
+    // //         dashSize={0.3}
+    // //         dashScale={10}
+    // //         opacity={0.08}
+    // //       />
+    // //     )
+    // //   }
+    // }
 
-    return lines
+    // return lines
   }
 
   // Create a line from the snake's head in the current direction
@@ -318,10 +318,10 @@ export function PathGuidelines({ gridSize, currentDirection, snakeHead }: PathGu
   return (
     <>
       {/* Static grid lines */}
-      {createGridLines()}
+      {/* {createGridLines()} */}
 
       {/* Current path highlight */}
-      {createCurrentPathLine()}
+      {/* {createCurrentPathLine()} */}
     </>
   )
 }

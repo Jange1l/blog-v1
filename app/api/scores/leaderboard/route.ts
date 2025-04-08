@@ -6,8 +6,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // Check environment variables
     checkEnvVars()
 
-    // Get the top 10 scores
-    const limit = 10
+    // Get the top 20 scores
+    const limit = 20
 
     // Query users sorted by highest_score in descending order
     const { data: topUsers, error } = await supabaseAdmin
