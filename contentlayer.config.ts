@@ -1,8 +1,8 @@
 import { defineDocumentType, ComputedFields, makeSource } from 'contentlayer/source-files'
-import { writeFileSync } from 'fs'
+import { writeFileSync } from 'node:fs'
 import readingTime from 'reading-time'
 import { slug } from 'github-slugger'
-import path from 'path'
+import path from 'node:path'
 // Remark packages
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
@@ -120,6 +120,8 @@ export const InProgress = defineDocumentType(() => ({
     tags: { type: 'list', of: { type: 'string' }, default: [] },
     draft: { type: 'boolean', default: true },
     summary: { type: 'string', required: false },
+    layout: { type: 'string' },
+    images: { type: 'json' },
   },
   computedFields,
 }))
