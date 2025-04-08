@@ -29,13 +29,16 @@ export function Leaderboard() {
             'Cache-Control': 'no-cache',
           },
         })
-        console.log('Response: ', response)
+
         if (!response.ok) {
           throw new Error('Failed to fetch leaderboard')
         }
 
         const data = await response.json()
         setLeaderboard(data.leaderboard || [])
+
+        // Log the top users' data
+        console.log('Top users data:', data.leaderboard)
       } catch (error) {
         console.error('Error fetching leaderboard:', error)
         setError('Failed to load leaderboard data')
