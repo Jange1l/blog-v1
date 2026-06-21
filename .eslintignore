@@ -1,8 +1,0 @@
-# Next.js build folder
-.next/
-# Output directory
-out/
-# Dependencies
-node_modules/
-# Contentlayer
-.contentlayer/
