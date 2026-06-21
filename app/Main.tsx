@@ -18,11 +18,10 @@ export default function Home({ posts }) {
         </div>
         <div className="py-16 sm:py-20 lg:py-28">
           <p className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-primary-600 dark:text-primary-400">
-            {siteMetadata.headerTitle}
+            Blog
           </p>
           <h1 className="max-w-3xl text-balance text-4xl font-bold leading-[1.08] tracking-tight text-gray-900 dark:text-gray-100 sm:text-5xl lg:text-6xl">
-            Building thoughtful software, and writing about{' '}
-            <span className="text-primary-600 dark:text-primary-400">the journey.</span>
+            {siteMetadata.author}
           </h1>
           <p className="mt-6 max-w-2xl text-pretty text-lg leading-8 text-gray-600 dark:text-gray-400">
             {siteMetadata.description}
