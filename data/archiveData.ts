@@ -1,11 +1,17 @@
-interface Project {
+interface ArchiveItem {
   title: string
   description: string
   href?: string
   imgSrc?: string
 }
 
-const projectsData: Project[] = [
+const archiveData: ArchiveItem[] = [
+  {
+    title: '3D Snake Game',
+    description: `A fully 3D Snake game built with React Three Fiber and Three.js, with sign-in and a global leaderboard.`,
+    imgSrc: '/static/images/snake-game.png',
+    href: '/snake-game',
+  },
   {
     title: 'NFT Builder',
     description: `Build large collections of NFT's with a small input of different layers`,
@@ -20,4 +26,4 @@ const projectsData: Project[] = [
   },
 ]
 
-export default projectsData
+export default archiveData
