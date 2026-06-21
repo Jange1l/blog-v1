@@ -7,12 +7,6 @@ interface ArchiveItem {
 
 const archiveData: ArchiveItem[] = [
   {
-    title: '3D Snake Game',
-    description: `A fully 3D Snake game built with React Three Fiber and Three.js, with sign-in and a global leaderboard.`,
-    imgSrc: '/static/images/snake-game.png',
-    href: '/snake-game',
-  },
-  {
     title: 'NFT Builder',
     description: `Build large collections of NFT's with a small input of different layers`,
     imgSrc: '/static/images/time-machine.jpg',
