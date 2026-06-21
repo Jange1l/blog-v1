@@ -99,7 +99,7 @@ export default function ListLayoutWithTags({
               <ul>
                 {sortedTags.map((t) => {
                   return (
-                    <li key={t} className="my-tag-gap">
+                    <li key={t} className="my-1">
                       {pathname.split('/tags/')[1] === slug(t) ? (
                         <h3 className="inline px-3 py-2 text-sm font-bold uppercase text-primary-500">
                           {`${t} (${tagCounts[t]})`}
@@ -135,11 +135,14 @@ export default function ListLayoutWithTags({
                       <div className="space-y-3">
                         <div>
                           <h2 className="text-2xl font-bold leading-8 tracking-tight">
-                            <Link href={`/${path}`} className="text-gray-900 dark:text-gray-100">
+                            <Link
+                              href={`/${path}`}
+                              className="rounded-sm text-gray-900 transition-colors hover:text-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500 dark:text-gray-100 dark:hover:text-primary-400"
+                            >
                               {title}
                             </Link>
                           </h2>
-                          <div className="gap-tag-gap mt-2 flex flex-wrap">
+                          <div className="mt-2 flex flex-wrap gap-2">
                             {tags?.map((tag) => <Tag key={tag} text={tag} />)}
                           </div>
                         </div>

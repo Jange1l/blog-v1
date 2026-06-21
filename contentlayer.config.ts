@@ -1,11 +1,13 @@
-import { defineDocumentType, ComputedFields, makeSource } from 'contentlayer/source-files'
-import { writeFileSync } from 'node:fs'
+import { defineDocumentType, ComputedFields, makeSource } from 'contentlayer2/source-files'
+import { writeFileSync } from 'fs'
 import readingTime from 'reading-time'
 import { slug } from 'github-slugger'
-import path from 'node:path'
+import path from 'path'
+import { fromHtmlIsomorphic } from 'hast-util-from-html-isomorphic'
 // Remark packages
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
+import { remarkAlert } from 'remark-github-blockquote-alert'
 import {
   remarkExtractFrontmatter,
   remarkCodeTitles,
@@ -16,14 +18,29 @@ import {
 import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypeKatex from 'rehype-katex'
+import rehypeKatexNoTranslate from 'rehype-katex-notranslate'
 import rehypeCitation from 'rehype-citation'
 import rehypePrismPlus from 'rehype-prism-plus'
 import rehypePresetMinify from 'rehype-preset-minify'
 import siteMetadata from './data/siteMetadata'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
+import prettier from 'prettier'
 
 const root = process.cwd()
 const isProduction = process.env.NODE_ENV === 'production'
+
+// heroicon mini link
+const icon = fromHtmlIsomorphic(
+  `
+  <span class="content-header-link">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="linkicon h-5 w-5">
+    <path d="M12.232 4.232a2.5 2.5 0 013.536 3.536l-1.225 1.224a.75.75 0 001.061 1.06l1.224-1.224a4 4 0 00-5.656-5.656l-3 3a4 4 0 00.225 5.865.75.75 0 00.977-1.138 2.5 2.5 0 01-.142-3.667l3-3z" />
+    <path d="M11.603 7.963a.75.75 0 00-.977 1.138 2.5 2.5 0 01.142 3.667l-3 3a2.5 2.5 0 01-3.536-3.536l1.225-1.224a.75.75 0 00-1.061-1.06l-1.224 1.224a4 4 0 105.656 5.656l3-3a4 4 0 00-.225-5.865z" />
+  </svg>
+  </span>
+`,
+  { fragment: true }
+)
 
 const computedFields: ComputedFields = {
   readingTime: { type: 'json', resolve: (doc) => readingTime(doc.body.raw) },
@@ -39,13 +56,13 @@ const computedFields: ComputedFields = {
     type: 'string',
     resolve: (doc) => doc._raw.sourceFilePath,
   },
-  toc: { type: 'string', resolve: (doc) => extractTocHeadings(doc.body.raw) },
+  toc: { type: 'json', resolve: (doc) => extractTocHeadings(doc.body.raw) },
 }
 
 /**
  * Count the occurrences of all tags across blog posts and write to json file
  */
-function createTagCount(allBlogs) {
+async function createTagCount(allBlogs) {
   const tagCount: Record<string, number> = {}
   allBlogs.forEach((file) => {
     if (file.tags && (!isProduction || file.draft !== true)) {
@@ -59,7 +76,8 @@ function createTagCount(allBlogs) {
       })
     }
   })
-  writeFileSync('./app/tag-data.json', JSON.stringify(tagCount))
+  const formatted = await prettier.format(JSON.stringify(tagCount, null, 2), { parser: 'json' })
+  writeFileSync('./app/tag-data.json', formatted)
 }
 
 function createSearchIndex(allBlogs) {
@@ -68,7 +86,7 @@ function createSearchIndex(allBlogs) {
     siteMetadata.search.kbarConfig.searchDocumentsPath
   ) {
     writeFileSync(
-      `public/${siteMetadata.search.kbarConfig.searchDocumentsPath}`,
+      `public/${path.basename(siteMetadata.search.kbarConfig.searchDocumentsPath)}`,
       JSON.stringify(allCoreContent(sortPosts(allBlogs)))
     )
     console.log('Local search index generated...')
@@ -137,6 +155,7 @@ export const Authors = defineDocumentType(() => ({
     company: { type: 'string' },
     email: { type: 'string' },
     twitter: { type: 'string' },
+    bluesky: { type: 'string' },
     linkedin: { type: 'string' },
     github: { type: 'string' },
     layout: { type: 'string' },
@@ -155,11 +174,22 @@ export default makeSource({
       remarkCodeTitles,
       remarkMath,
       remarkImgToJsx,
+      remarkAlert,
     ],
     rehypePlugins: [
       rehypeSlug,
-      rehypeAutolinkHeadings,
+      [
+        rehypeAutolinkHeadings,
+        {
+          behavior: 'prepend',
+          headingProperties: {
+            className: ['content-header'],
+          },
+          content: icon,
+        },
+      ],
       rehypeKatex,
+      rehypeKatexNoTranslate,
       [rehypeCitation, { path: path.join(root, 'data') }],
       [rehypePrismPlus, { defaultLanguage: 'js', ignoreMissing: true }],
       rehypePresetMinify,

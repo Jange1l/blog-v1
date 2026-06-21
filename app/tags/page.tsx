@@ -18,7 +18,7 @@ export default async function Page() {
             Tags
           </h1>
         </div>
-        <div className="gap-tag-gap flex max-w-lg flex-wrap">
+        <div className="flex max-w-lg flex-wrap gap-2">
           {tagKeys.length === 0 && 'No tags found.'}
           {sortedTags.map((t) => {
             return (

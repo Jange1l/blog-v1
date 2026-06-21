@@ -28,22 +28,32 @@ type SocialIconProps = {
   size?: number
 }
 
+// Static class map so Tailwind can detect the utilities at build time.
+const sizeClasses: Record<number, string> = {
+  4: 'h-4 w-4',
+  5: 'h-5 w-5',
+  6: 'h-6 w-6',
+  8: 'h-8 w-8',
+}
+
 const SocialIcon = ({ kind, href, size = 8 }: SocialIconProps) => {
   if (!href || (kind === 'mail' && !/^mailto:\w+([.-]?\w+)@\w+([.-]?\w+)(.\w{2,3})+$/.test(href)))
     return null
 
   const SocialSvg = components[kind]
+  const sizeClass = sizeClasses[size] ?? sizeClasses[8]
 
   return (
     <a
-      className="text-sm text-gray-500 transition hover:text-gray-600"
+      className="rounded-sm text-sm text-gray-500 transition-colors hover:text-gray-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
       target="_blank"
       rel="noopener noreferrer"
       href={href}
     >
       <span className="sr-only">{kind}</span>
       <SocialSvg
-        className={`fill-current text-gray-700 hover:text-primary-500 dark:text-gray-200 dark:hover:text-primary-400 h-${size} w-${size}`}
+        className={`${sizeClass} fill-current text-gray-600 transition-colors hover:text-primary-500 dark:text-gray-400 dark:hover:text-primary-400`}
+        aria-hidden="true"
       />
     </a>
   )

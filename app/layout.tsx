@@ -80,18 +80,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-white text-black antialiased dark:bg-gray-950 dark:text-white">
         <ThemeProviders>
           <Analytics analyticsConfig={siteMetadata.analytics as AnalyticsConfig} />
-
-          {/* <Analytics /> */}
-
-          <SectionContainer>
-            <div className="flex h-screen flex-col justify-between font-sans">
-              <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
-                <Header />
-                <main className="mb-auto">{children}</main>
-              </SearchProvider>
+          <a
+            href="#main-content"
+            className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-4 focus-visible:z-80 focus-visible:rounded-md focus-visible:bg-primary-600 focus-visible:px-4 focus-visible:py-2 focus-visible:text-sm focus-visible:font-semibold focus-visible:text-white"
+          >
+            Skip to content
+          </a>
+          <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
+            <div className="flex min-h-screen flex-col font-sans">
+              <Header />
+              <SectionContainer>
+                <main id="main-content" className="mb-auto">
+                  {children}
+                </main>
+              </SectionContainer>
               <Footer />
             </div>
-          </SectionContainer>
+          </SearchProvider>
         </ThemeProviders>
       </body>
     </html>
